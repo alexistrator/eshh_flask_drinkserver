@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Drinks</title>
+{% endblock%}
+
+{% block body %}
+<h1> All Drinks </h1>
+
+	{% for drink in drinks %}
+		
+		<h2>{{ drink.title  }}</h2>
+
+		{% if drink.author  %}
+			<h3> By: {{ drink.author }} </h3>
+		{% else %}
+			<h3> Author unknown </h3>
+		{% endif %}
+			<p> {{ drink.content }} </p>
+	{% endfor %}
+
+{% endblock %}}

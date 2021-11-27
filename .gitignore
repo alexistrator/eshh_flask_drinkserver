@@ -228,3 +228,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# any swap files
+*.swp

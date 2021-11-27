@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from RPi import GPIO
 
 
@@ -13,15 +13,31 @@ GPIO.setup(OUTPUTTER, GPIO.OUT)
 
 app = Flask(__name__)
 
+all_drinks = [
+        {
+            'title':'Drink 1',
+            'content': 'This is the recipe of drink 1',
+            'author': 'Alex'
+        },
+        {
+            'title' : 'Drink 2',
+            'content' : 'This is the recipe of drink 2'
+        }
+        ]
+
 @app.route('/')
 def index():
-    return 'Hello world'
+    return render_template('index.html')
+
+@app.route('/drinks')
+def drinks():
+    return render_template('drinks.html', drinks=all_drinks)
 
 @app.route('/led_on')
 def fanOn(): 
     GPIO.output(OUTPUT, 1)
     GPIO.output(OUTPUTTER, 1)
-    return '<h1>LED should be be shinig bright like a diamond in the sky</h1>'
+    return '<h1>Da LED should be be shinig bright like a diamond in the sky</h1>'
 
 @app.route('/led_off')
 def fanOff():
@@ -32,4 +48,4 @@ def fanOff():
 
 
 if __name__== '__main__':
-    app.run(debug=True, port=5000, host='192.168.26.176')
+    app.run(debug=True, port=5000, host='192.168.1.141')
