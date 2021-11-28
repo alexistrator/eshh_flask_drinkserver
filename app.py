@@ -1,6 +1,6 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 from RPi import GPIO
-
+from flask_sqlalchemy import SQLAlchemy
 
 # Conf the pins:
 
@@ -13,17 +13,36 @@ GPIO.setup(OUTPUTTER, GPIO.OUT)
 
 app = Flask(__name__)
 
-all_drinks = [
-        {
-            'title':'Drink 1',
-            'content': 'This is the recipe of drink 1',
-            'author': 'Alex'
-        },
-        {
-            'title' : 'Drink 2',
-            'content' : 'This is the recipe of drink 2'
-        }
-        ]
+
+# Tell flask where the database can be found / what database we want to use:
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///drinks.db'
+db = SQLAlchemy(app)
+
+# Model the database:
+class Drink(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+
+    def __repr__(self): # displays something to the screen after creating a blogpost
+        return 'Drink ' + str(self.id)
+
+class Liquid(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    alc_category = db.Column(db.String(20), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    alc_content = db.Column(db.Float, nullable=True)
+
+class Recipe(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    # There's quite some work to do here, i need:
+    # 1) pk from Drink
+    # 2b) Drink.name in order to filter through this shit (or should I just build a dynamic query?)
+    # 2) pk from Liquid
+    # 3) amount of liquid
+    # 4) This would be fun: Amount of times that it was made. Each execution would be +1.
+
 
 @app.route('/')
 def index():
@@ -31,7 +50,22 @@ def index():
 
 @app.route('/drinks')
 def drinks():
+    all_drinks = Drink.query.order_by(Drink.title).all()
     return render_template('drinks.html', drinks=all_drinks)
+
+@app.route('/admin/add_drink', methods=['GET', 'POST'])
+def add_drink():
+    if request.method == 'POST':
+        drink_title = request.form['title']
+        drink_description = request.form['description']
+        # add for loop to add to the liquid-drink-table
+        new_drink = Drink(title=drink_title, description=drink_description)
+        db.session.add(new_drink)
+        db.session.commit()
+        return redirect('/admin/add_drink')
+    else:
+        return render_template('add_drink.html')
+
 
 @app.route('/led_on')
 def fanOn(): 
