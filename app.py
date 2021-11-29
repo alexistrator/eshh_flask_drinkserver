@@ -30,9 +30,9 @@ beverages = {
 
 
 ########################################################################################################################
-
+#
 # GPIO CONFIGURATION
-
+#
 ########################################################################################################################
 
 # Pins for the pumps:
@@ -62,9 +62,9 @@ beverages = {
 app = Flask(__name__)
 
 ########################################################################################################################
-
+#
 # DATABASE
-
+#
 ########################################################################################################################
 
 # Tell flask where the database can be found / what database we want to use:
@@ -80,9 +80,6 @@ class Drink(db.Model):
     def __repr__(self): # displays something to the screen after creating a blogpost
         return 'Drink ' + str(self.id)
 
-# We're working with a simplified cocktail dataset, as well as a simplified model. I will not fully normalize the
-# table, as I think it's not necessary in this example. 
-
 class Liquid(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
@@ -92,25 +89,36 @@ class Liquid(db.Model):
 
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    # There's quite some work to do here, i need:
     id_drink = db.Column(db.Integer, nullable=False)
     id_liquid = db.Column(db.Integer, nullable=False)
-    ml_liquid = db.Column(db.Integer, nullable=False)
-    
+    ml_liquid = db.Column(db.Integer, nullable=False)    
     # 4) This would be fun: Amount of times that it was made. Each execution would be +1.
 
 
-########################################################################################################################
 
+
+
+########################################################################################################################
+#
 # ROUTING, ADDING/DELETING/UPDATING
-
+#
 ########################################################################################################################
-@app.route('/')
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    if READY:
+    if READY and request.method == 'GET':
         return render_template('index.html')
     else:
-        return render_template('configure_robot.html')
+        if request.method == 'GET':
+            return render_template('configure_robot.html')
+        else:
+            # handle the input
+            # configure robot variables
+            # when all is done, change READY to True, or keep it false, if the input is not correct
+            # redirect to /
+
+
+# --- DRINKS ---
 
 @app.route('/drinks')
 def drinks():
@@ -151,9 +159,13 @@ def add_drink():
             new_recipe = Recipe(id_drink= drink_id, id_liquid= liquid_id, ml_liquid=liquid_amount)
             db.session.add(new_recipe)
             db.session.commit()
+    
         return redirect('/admin/add_drink')
+    
     else:
         return render_template('/admin/add_drink.html')
+
+# --- LIQUIDS ---
 
 @app.route('/admin/add_liquid', methods=['GET', 'POST'])
 def add_liquid():
@@ -164,13 +176,14 @@ def add_liquid():
         alcohol_volume = request.form['alc_volume']
         
         new_liquid = Liquid(name=name_liquid, 
-                alc_category=category_liquid, 
-                description=description_liquid, 
-                alc_content=alcohol_volume)
-
+                            alc_category=category_liquid, 
+                            description=description_liquid, 
+                            alc_content=alcohol_volume)
         db.session.add(new_liquid)
         db.session.commit()
+
         return redirect('/admin/add_liquid')
+    
     else:
         return render_template('/admin/add_liquid.html')
 
@@ -180,28 +193,13 @@ def show_liquids():
     all_liquids = Liquid.query.all()
     return render_template('liquids.html', liquids=all_liquids)
    
-# TODO save the current tube configuration in some sort of global variable
 @app.route('/admin/configure_liquids', methods=['GET', 'POST'])
 def configure_liquids():
     if request.method == 'POST':
         return redirect('/admin/configure_liquids')
     else:
-        #all_liquids =  
+        all_liquids = Liquid.query.all()  
         return render_template('/admin/configure_liquids.html', all_liquids)
-
-@app.route('/led_on')
-def fanOn(): 
-    GPIO.output(OUTPUT, 1)
-    GPIO.output(OUTPUTTER, 1)
-    return '<h1>Da LED should be be shinig bright like a diamond in the sky</h1>'
-
-@app.route('/led_off')
-def fanOff():
-    
-    GPIO.output(OUTPUT, 0)
-    GPIO.output(OUTPUTTER, 0)
-    return '<h1>LED should be fucking dead</h1>'
-
 
 ########################################################################################################################
 #
@@ -209,6 +207,8 @@ def fanOff():
 #
 ########################################################################################################################
 
+
+# handle the pouring process:
 
 
 # handle the site logic
@@ -240,6 +240,7 @@ def get_liquid_by_id(id_liquid_req:int, all_liquids):
 def set_robot_configuration(conf_array):
     return
 
+# make the functions available for jinja, so they can be called from the html-file.
 app.jinja_env.globals.update(get_recipes_for_drink=get_recipes_for_drink)
 app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 
