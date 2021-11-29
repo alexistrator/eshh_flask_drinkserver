@@ -2,17 +2,70 @@ from flask import Flask, render_template, request, redirect
 from RPi import GPIO
 from flask_sqlalchemy import SQLAlchemy
 
-# Conf the pins:
 
-OUTPUT = 2
-OUTPUTTER = 3
+########################################################################################################################
+#
+# STATUS VARIABLES
+#
+########################################################################################################################
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(OUTPUT, GPIO.OUT) 
-GPIO.setup(OUTPUTTER, GPIO.OUT)
+READY = False
+ERROR = False
+
+
+########################################################################################################################
+#
+# ROBOT CONFIGURATION
+#
+########################################################################################################################
+
+beverages = {
+        pump_1:"",
+        pump_2:"",
+        pump_3:"",
+        pump_4:"",
+        pump_5:"",
+        valve:""
+        }
+
+
+########################################################################################################################
+
+# GPIO CONFIGURATION
+
+########################################################################################################################
+
+# Pins for the pumps:
+
+#pump1
+#pump2
+#pump3
+
+# Pins for the scale:
+
+#scale_out
+#scale_in1
+#scale_in2
+
+# Pins for the distance sensor:
+
+#distance1
+#distance2
+#distance3
+
+# Pins for the LED Stripes
+
+# rgb1
+# rgb2
+# rgb3
 
 app = Flask(__name__)
 
+########################################################################################################################
+
+# DATABASE
+
+########################################################################################################################
 
 # Tell flask where the database can be found / what database we want to use:
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///drinks.db'
@@ -47,18 +100,26 @@ class Recipe(db.Model):
     # 4) This would be fun: Amount of times that it was made. Each execution would be +1.
 
 
+########################################################################################################################
+
+# ROUTING, ADDING/DELETING/UPDATING
+
+########################################################################################################################
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if READY:
+        return render_template('index.html')
+    else:
+        return render_template('configure_robot.html')
 
 @app.route('/drinks')
 def drinks():
+
+    # get all the data we need to resolve the drinks
     all_drinks = Drink.query.order_by(Drink.title).all()
-    # TODO
-    # we will need the recipes as well.
     all_recipes = Recipe.query.all()
     all_liquids = Liquid.query.all()
-    # give that query result to the render template
+    
     return render_template('drinks.html', drinks=all_drinks, recipes=all_recipes)
 
 @app.route('/admin/add_drink', methods=['GET', 'POST'])
@@ -72,32 +133,10 @@ def add_drink():
         new_drink = Drink(title=drink_title, description=drink_description)
         db.session.add(new_drink)
         db.session.commit()
-        
-        # Create the recipe rows:
-        # get drink id and store it in order to also create the recipe
+       
+
+        # Create drink rows and add them to the db
         drink_id = Drink.query.filter_by(title=drink_title, description=drink_description)[0].id
-
-        # TODO
-        # The rows below should be a dict, which will be used to create the recipe
-        # The values in here can only be chosen from the existing list of drinks, so we can work with id's:
-        # Get the respective IDs of the drink, map the amount, map the cocktail ID
-        
-        liquid_1 = request.form['liquid_1']
-        ml_liquid_1 = request.form['ml_liquid_1']
-        ml_liquid_1 = request.form['ml_liquid_1']
-        liquid_2 = request.form['liquid_2']
-        ml_liquid_2 = request.form['ml_liquid_2']
-        liquid_3 = request.form['liquid_3']
-        ml_liquid_3 = request.form['ml_liquid_3']
-        liquid_4 = request.form['liquid_4']
-        ml_liquid_4 = request.form['ml_liquid_4']
-        liquid_5 = request.form['liquid_5']
-        ml_liquid_5 = request.form['ml_liquid_5']
-      
-        print(liquid_1)
-
-        
-        # TODO - write the dictionary according to the line below, and test it.
         liquids = {
              Liquid.query.filter_by(name=request.form['liquid_1']).first().id : request.form['ml_liquid_1'],
              Liquid.query.filter_by(name=request.form['liquid_2']).first().id : request.form['ml_liquid_2'],
@@ -106,8 +145,6 @@ def add_drink():
              Liquid.query.filter_by(name=request.form['liquid_5']).first().id : request.form['ml_liquid_5'], 
         }
         
-       
-        # TODO
         for key in liquids:
             liquid_id = key
             liquid_amount = liquids[key]
@@ -119,7 +156,6 @@ def add_drink():
         return render_template('/admin/add_drink.html')
 
 @app.route('/admin/add_liquid', methods=['GET', 'POST'])
-# TODO write template for adding liquids, analogue to the one with the drinks
 def add_liquid():
     if request.method == 'POST':
         name_liquid = request.form['name']
@@ -167,8 +203,29 @@ def fanOff():
     return '<h1>LED should be fucking dead</h1>'
 
 
+########################################################################################################################
+#
+# FUNCTIONS BACKEND 
+#
+########################################################################################################################
 
-######## This part contains global functions that can be called by jinja ###########
+
+
+# handle the site logic
+def print_hello():
+    print("hello")
+
+# tare and handle the scale
+
+# handle the distance sensor
+
+
+
+########################################################################################################################
+#
+# FUNCTIONS JINJA
+#
+########################################################################################################################
 
 def get_recipes_for_drink(id_drink_req:int, all_recipes):
     all_recipes = Recipe.query.filter_by(id_drink=id_drink_req).all()
@@ -178,10 +235,14 @@ def get_liquid_by_id(id_liquid_req:int, all_liquids):
     liquid = Liquid,quer.filter_by(id=id_liquid_req).first()
     return liquid
 
+# TODO write a function to get the available drinks with the given bottle configuration
 
+def set_robot_configuration(conf_array):
+    return
 
 app.jinja_env.globals.update(get_recipes_for_drink=get_recipes_for_drink)
 app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 
 if __name__== '__main__':
     app.run(debug=True, port=5000, host='192.168.1.141')
+    print_hello()
