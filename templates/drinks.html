@@ -10,13 +10,13 @@
 	{% for drink in drinks %}
 		
 		<h2>{{ drink.title  }}</h2>
+		<p>{{ drink.description }}
+		
+		{% for recipe in get_recipes_for_drink(drink.id, all_recipes)  %}
+			hello
+			{{get_liquid_by_id(recipe.id_liquid, all_liquids)}} : {{recipe.ml_liquid}}
 
-		{% if drink.author  %}
-			<h3> By: {{ drink.author }} </h3>
-		{% else %}
-			<h3> Author unknown </h3>
-		{% endif %}
-			<p> {{ drink.content }} </p>
+		{% endfor %}
 	{% endfor %}
 
 {% endblock %}}

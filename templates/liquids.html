@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Liquids</title>
+{% endblock%}
+
+{% block body %}
+<h1> All Liquids </h1>
+
+	{% for liquid in liquids  %}
+		
+		<h2>{{ liquid.name }}</h2>
+		<p>{{ liquid.alc_category }}
+		
+	{% endfor %}
+
+{% endblock %}}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Add Liquid</title>
+{% endblock %}
+
+{% block body %}
+<h1> Add a new liquid to the database </h1>
+
+<hr> 
+<form action='/admin/add_liquid' method='POST'>
+	Name of Beverage: <input type='text' name='name' id='name' required>
+	<br>
+	Description: <input type='text' name='description' id='description' required>
+	<br>
+	Category: <input type='text' name='category' id='category' required>
+	<br>
+	Alcohol Volume:  <input type='number' name='alc_volume' id='alc_volume' required>
+	<br>
+	<input type='submit' value='Add Liquid'>
+	</form>
+<hr>
+
+{% endblock %}
