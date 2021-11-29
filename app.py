@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect
 from RPi import GPIO
 from flask_sqlalchemy import SQLAlchemy
-
+import re
 
 ########################################################################################################################
 #
@@ -20,12 +20,12 @@ ERROR = False
 ########################################################################################################################
 
 beverages = {
-        pump_1:"",
-        pump_2:"",
-        pump_3:"",
-        pump_4:"",
-        pump_5:"",
-        valve:""
+        "pump_1":"",
+        "pump_2":"",
+        "pump_3":"",
+        "pump_4":"",
+        "pump_5":"",
+        "valve":""
         }
 
 
@@ -37,27 +37,27 @@ beverages = {
 
 # Pins for the pumps:
 
-#pump1
-#pump2
-#pump3
+pump1 = 0
+pump2 = 0
+pump3 = 0
 
 # Pins for the scale:
 
-#scale_out
-#scale_in1
-#scale_in2
+scale_out = 0 
+scale_in1 = 0
+scale_in2 = 0
 
 # Pins for the distance sensor:
 
-#distance1
-#distance2
-#distance3
+distance1 = 0
+distance2 = 0
+distance3 = 0
 
 # Pins for the LED Stripes
 
-# rgb1
-# rgb2
-# rgb3
+rgb1 = 0
+rgb2 = 0
+rgb3 = 0
 
 app = Flask(__name__)
 
@@ -106,17 +106,36 @@ class Recipe(db.Model):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    global READY
+    try:
+        print(READY)
+    except:
+        print("initializing variable READY")
+        READY = False
+        pass
+
     if READY and request.method == 'GET':
-        return render_template('index.html')
+        return redirect('/drinks')
     else:
         if request.method == 'GET':
-            return render_template('configure_robot.html')
+            return render_template('/admin/conf_robot.html', options=options())
         else:
-            # handle the input
-            # configure robot variables
-            # when all is done, change READY to True, or keep it false, if the input is not correct
+            selection = request.form
+            keys = list(selection.keys())
+            print(keys)
+            
+            for i in range(0,len(keys)):
+                
+                if re.match('^pump', keys[i]):
+                    beverages[keys[i]] = selection[keys[i]]
+                if re.match('^vale', keys[i]):
+                    beverages[[i]] = selection[keys[i]]
+                # when all is done, change READY to True, or keep it false, if the input is not correct
+            READY = True
+            print(beverages)
+            print(READY)
             # redirect to /
-
+            return redirect('/')
 
 # --- DRINKS ---
 
@@ -135,35 +154,48 @@ def add_drink():
     
     if request.method == 'POST':
         
-        # Create new drink row:
         drink_title = request.form['title']
         drink_description = request.form['description']
-        new_drink = Drink(title=drink_title, description=drink_description)
-        db.session.add(new_drink)
-        db.session.commit()
-       
 
-        # Create drink rows and add them to the db
-        drink_id = Drink.query.filter_by(title=drink_title, description=drink_description)[0].id
-        liquids = {
-             Liquid.query.filter_by(name=request.form['liquid_1']).first().id : request.form['ml_liquid_1'],
-             Liquid.query.filter_by(name=request.form['liquid_2']).first().id : request.form['ml_liquid_2'],
-             Liquid.query.filter_by(name=request.form['liquid_3']).first().id : request.form['ml_liquid_3'],
-             Liquid.query.filter_by(name=request.form['liquid_4']).first().id : request.form['ml_liquid_4'],
-             Liquid.query.filter_by(name=request.form['liquid_5']).first().id : request.form['ml_liquid_5'], 
-        }
+        same_drinks = Drink.query.filter_by(title=drink_title).all()
         
-        for key in liquids:
-            liquid_id = key
-            liquid_amount = liquids[key]
-            new_recipe = Recipe(id_drink= drink_id, id_liquid= liquid_id, ml_liquid=liquid_amount)
-            db.session.add(new_recipe)
+        if len(same_drinks) == 0:
+            # Create new drink row:
+            new_drink = Drink(title=drink_title, description=drink_description)
+            db.session.add(new_drink)
             db.session.commit()
-    
-        return redirect('/admin/add_drink')
+
+            drink_id = new_drink.id
+       
+            liquids = {}
+            keys = list(request.form.keys())
+        
+            for i in range(0, len(keys), 2):
+                key = keys[i]
+                if keys[i] not in ['title','description'] and request.form[keys[i + 1]] != "":
+                    # this is terrible, i should check with regex which case it is, which in turn allows me to
+                    # get rid of the stupid if in condition
+                    try:
+                        liquid_id = Liquid.query.filter_by(name=request.form[keys[i]]).first().id
+                    except:
+                        pass
+                    try:
+                        liquid_amount = request.form[keys[i + 1]]
+                    except:
+                        pass
+                    new_recipe = Recipe(id_drink= drink_id, id_liquid= liquid_id, ml_liquid=liquid_amount)
+                    db.session.add(new_recipe)
+                    db.session.commit()
+            
+            success_code = "added the fucking drink, let's get wasted now!!"
+            return render_template('/admin/add_drink.html', status_code=success_code, options=options())
+        else:
+            print("did nothing, drink already exists")
+            error_code = "drink already exists, get rekt noob"
+            return render_template('/admin/add_drink.html', status_code=error_code, options=options())
     
     else:
-        return render_template('/admin/add_drink.html')
+        return render_template('/admin/add_drink.html', options=options())
 
 # --- LIQUIDS ---
 
@@ -232,7 +264,7 @@ def get_recipes_for_drink(id_drink_req:int, all_recipes):
     return all_recipes
 
 def get_liquid_by_id(id_liquid_req:int, all_liquids):
-    liquid = Liquid,quer.filter_by(id=id_liquid_req).first()
+    liquid = Liquid.query.filter_by(id=id_liquid_req).first().name
     return liquid
 
 # TODO write a function to get the available drinks with the given bottle configuration
@@ -240,10 +272,14 @@ def get_liquid_by_id(id_liquid_req:int, all_liquids):
 def set_robot_configuration(conf_array):
     return
 
+def options():
+    liquids = Liquid.query.all()
+    return liquids
+
 # make the functions available for jinja, so they can be called from the html-file.
 app.jinja_env.globals.update(get_recipes_for_drink=get_recipes_for_drink)
 app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 
 if __name__== '__main__':
     app.run(debug=True, port=5000, host='192.168.1.141')
-    print_hello()
+    

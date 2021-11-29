@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Configure Robot</title>
+{% endblock %}
+
+{% block body %}
+<h1> The future is now, old man! </h1>
+<h3> Please take a moment to configure your bartender </h3>
+<hr> 
+<form action='/' method='POST'>
+	Tube 1: 
+	<select name="pump_1" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
+	<br>
+	Tube 2: 
+	<select name="pump_2" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
+	<br>
+	Tube 3: 
+	<select name="pump_3" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
+	<br>
+	Tube 4: 
+	<select name="pump_4" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
+	<br>
+	Tube 5: 
+	<select name="pump_5" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
+	<br>
+
+	Container: 
+	<select name="valve" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
+	<br>
+	<input type='submit' value='Start drinking!'>
+</form>
+<hr>
+<h3>{{status_code}}</h3>
+{% endblock %}

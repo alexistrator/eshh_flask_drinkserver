@@ -13,23 +13,63 @@
 	<br>
 	Description: <input type='text' name='description' id='description' required>
 	<br>
-	Liquid 1: <input type='text' name='liquid_1' id='liq_1' required>
-	Amount in ml: <input type='number' name='ml_liquid_1' id='ml_liq_1' required>
+	Liquid 1: 
+	<select name="liquid_1" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
+        Amount in ml: <input type='text' name='ml_liquid_1' id='ml_liq_1'>
 	<br>
-	Liquid 2: <input type='text' name='liquid_2' id='liq_2'>
+	Liquid 2: 
+	<select name="liquid_2" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
         Amount in ml: <input type='text' name='ml_liquid_2' id='ml_liq_2'>
 	<br>
-	Liquid 3: <input type='text' name='liquid_3' id='liq_3'>
+	Liquid 3: 
+	<select name="liquid_3" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
         Amount in ml: <input type='text' name='ml_liquid_3' id='ml_liq_3'>
 	<br>
-	Liquid 4: <input type='text' name='liquid_4' id='liq_4'>
+	Liquid 4: 
+	<select name="liquid_4" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
         Amount in ml: <input type='text' name='ml_liquid_4' id='ml_liq_4'>
 	<br>
-	Liquid 5: <input type='text' name='liquid_5' id='liq_5'>
+	Liquid 5: 
+	<select name="liquid_5" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
         Amount in ml: <input type='text' name='ml_liquid_5' id='ml_liq_5'>
+	<br>
+
+	Liquid 6: 
+	<select name="liquid_6" width="500px">
+		<option value='' SELECTED></option>
+	{% for o in options %}
+    		<option value="{{ o.name }}">{{ o.name }}</option>
+	{% endfor %}
+	</select>
+        Amount in ml: <input type='text' name='ml_liquid_6' id='ml_liq_5'>
 	<br>
 	<input type='submit' value='Add Drink'>
 </form>
 <hr>
-
+<h3>{{status_code}}</h3>
 {% endblock %}

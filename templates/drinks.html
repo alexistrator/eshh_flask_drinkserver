@@ -10,13 +10,13 @@
 	{% for drink in drinks %}
 		
 		<h2>{{ drink.title  }}</h2>
-		<p>{{ drink.description }}
-		
+		<p>{{ drink.description }}</p>
+		<br>
 		{% for recipe in get_recipes_for_drink(drink.id, all_recipes)  %}
-			hello
-			{{get_liquid_by_id(recipe.id_liquid, all_liquids)}} : {{recipe.ml_liquid}}
-
+			<b>{{get_liquid_by_id(recipe.id_liquid, all_liquids)}}:</b>  {{recipe.ml_liquid}}ml
+			<br>
 		{% endfor %}
+		<hr>
 	{% endfor %}
 
 {% endblock %}}
