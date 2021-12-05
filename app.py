@@ -151,9 +151,14 @@ def drinks():
 
 @app.route('/admin/add_drink', methods=['GET', 'POST'])
 def add_drink():
-    
+
+
+# get all the data we need to resolve the drinks
+    all_drinks, all_recipes, all_liquids = load_drinks_data()
+
     if request.method == 'POST':
         
+
         drink_title = request.form['title']
         drink_description = request.form['description']
 
@@ -186,16 +191,40 @@ def add_drink():
                     new_recipe = Recipe(id_drink= drink_id, id_liquid= liquid_id, ml_liquid=liquid_amount)
                     db.session.add(new_recipe)
                     db.session.commit()
-            
+            all_drinks, all_recipes, all_liquids = load_drinks_data() 
             success_code = "added the fucking drink, let's get wasted now!!"
-            return render_template('/admin/add_drink.html', status_code=success_code, options=options())
+            return render_template('/admin/add_drink.html', status_code=success_code, options=options(),
+                    drinks=all_drinks, recipes=all_recipes)
         else:
             print("did nothing, drink already exists")
             error_code = "drink already exists, get rekt noob"
-            return render_template('/admin/add_drink.html', status_code=error_code, options=options())
+            return render_template('/admin/add_drink.html',
+                    status_code=error_code, options=options(),
+                    drinks=all_drinks, recipes=all_recipes)
     
     else:
-        return render_template('/admin/add_drink.html', options=options())
+        all_drinks, all_recipes, all_liquids = load_drinks_data()
+        return render_template('/admin/add_drink.html', options=options(),
+                    drinks=all_drinks, recipes=all_recipes)
+
+@app.route('/admin/drinks/delete/<int:id>')
+def delete(id):
+    drink = Drink.query.get_or_404(id)
+    db.session.delete(drink)
+    db.session.commit()
+    return redirect('/admin/add_drink')
+
+@app.route('/admin/drinks/edit/<int:id>', methods=['GET', 'POST'])
+def edit(id):
+    if request.method == 'POST':
+        drink = Drink.query.get_or_404(id)
+        drink.title = request.form['title']
+        drink.description = request.form['description']
+        db.session.commit()
+        return redirect('/admin/add_drink')
+    else:
+        return render_template('/admin/edit_drink.html')
+
 
 # --- LIQUIDS ---
 
@@ -251,7 +280,14 @@ def print_hello():
 
 # handle the distance sensor
 
+# load all the data needed to display available drinks:
+def load_drinks_data():
+  # get all the data we need to resolve the drinks
+    all_drinks = Drink.query.order_by(Drink.title).all()
+    all_recipes = Recipe.query.all()
+    all_liquids = Liquid.query.all()
 
+    return all_drinks, all_recipes, all_liquids 
 
 ########################################################################################################################
 #
