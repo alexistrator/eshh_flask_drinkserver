@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 import re
+import db_operations
 
 # UNCOMMENT IF RUNNING FROM RASPI:
 #from RPi import GPIO
-
 
 ########################################################################################################################
 #
@@ -15,7 +15,6 @@ import re
 READY = False
 ERROR = False
 BASE_VALUE = 0
-
 
 ########################################################################################################################
 #
@@ -31,7 +30,6 @@ beverages = {
         "pump_5":"",
         "valve":""
         }
-
 
 ########################################################################################################################
 #
@@ -98,10 +96,6 @@ class Recipe(db.Model):
     ml_liquid = db.Column(db.Integer, nullable=False)    
     # 4) This would be fun: Amount of times that it was made. Each execution would be +1.
 
-
-
-
-
 ########################################################################################################################
 #
 # ROUTING, ADDING/DELETING/UPDATING
@@ -111,7 +105,7 @@ class Recipe(db.Model):
 # --- ROBOT CONFIGURATION --
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    global READY
+    global READY, beverages
     try:
         print(READY)
     except:
@@ -123,110 +117,52 @@ def index():
         return redirect('/drinks')
     else:
         if request.method == 'GET':
-            return render_template('/admin/conf_robot.html', options=options())
+            return render_template('/admin/conf_robot.html', options=db_operations.get_all_liquids_db())
         else:
-            selection = request.form
-            keys = list(selection.keys())
-            print(keys)
-            
-            for i in range(0,len(keys)):
-                
-                if re.match('^pump', keys[i]):
-                    beverages[keys[i]] = selection[keys[i]]
-                if re.match('^valve', keys[i]):
-                    beverages[keys[i]] = selection[keys[i]]
-                # when all is done, change READY to True, or keep it false, if the input is not correct
-
-            # TODO: 
-            # also read the base value of the distance sensor!!
-
-
+            beverages = db_operations.set_current_tube_conf(request, beverages)
             READY = True
-            print(beverages)
-            print(READY)
-            # redirect to /
             return redirect('/')
 
 @app.route('/admin/robot_configuration', methods=['GET', 'POST'])
 def robot_conf():
     global READY
-
     if request.method == 'GET':
-        READY = False
         print(beverages)
-        return render_template('/admin/conf_robot_edit.html', options=options(), beverages=beverages)
-    
+        return render_template('/admin/conf_robot_edit.html', options=db_operations.get_all_liquids_db(), beverages=beverages)
     else:
+        READY = False
         return redirect('/')
 
-
 # --- DRINKS ---
-
 @app.route('/drinks')
 def drinks():
-
-    # get all the data we need to resolve the drinks
-    all_drinks = Drink.query.order_by(Drink.title).all()
-    all_recipes = Recipe.query.all()
-    all_liquids = Liquid.query.all()
-    
+    all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
     return render_template('drinks.html', drinks=all_drinks, recipes=all_recipes)
 
 @app.route('/admin/add_drink', methods=['GET', 'POST'])
 def add_drink():
-
-
-# get all the data we need to resolve the drinks
-    all_drinks, all_recipes, all_liquids = load_drinks_data()
-
+    all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
     if request.method == 'POST':
-        
-
         drink_title = request.form['title']
         drink_description = request.form['description']
-
-        same_drinks = Drink.query.filter_by(title=drink_title).all()
+        same_drinks = db_operations.check_drink_duplicates(drink_title)
         
         if len(same_drinks) == 0:
-            # Create new drink row:
-            new_drink = Drink(title=drink_title, description=drink_description)
-            db.session.add(new_drink)
-            db.session.commit()
-
-            drink_id = new_drink.id
+            drink_id = db_operations.add_drink_to_db(db, drink_title, drink_description)
             keys = list(request.form.keys())
-        
-            for i in range(0, len(keys), 2):
-                key = keys[i]
-                print(key)
-                if key not in ['title','description'] and request.form[keys[i + 1]] != "":
-                    # this is terrible, i should check with regex which case it is, which in turn allows me to
-                    # get rid of the stupid if in condition
-                    try:
-                        liquid_id = Liquid.query.filter_by(name=request.form[key]).first().id
-                    except:
-                        pass
-                    try:
-                        liquid_amount = request.form[keys[i + 1]]
-                    except:
-                        pass
-                    new_recipe = Recipe(id_drink= drink_id, id_liquid= liquid_id, ml_liquid=liquid_amount)
-                    db.session.add(new_recipe)
-                    db.session.commit()
-            all_drinks, all_recipes, all_liquids = load_drinks_data() 
-            success_code = "added the fucking drink, let's get wasted now!!"
-            return render_template('/admin/add_drink.html', status_code=success_code, options=options(),
+            success_code = db_operations.add_recipe_to_db(db, keys, request, drink_id)
+            all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
+            return render_template('/admin/add_drink.html', status_code=success_code, options=db_operations.get_all_liquids_db(),
                     drinks=all_drinks, recipes=all_recipes)
         else:
             print("did nothing, drink already exists")
             error_code = "drink already exists, get rekt noob"
             return render_template('/admin/add_drink.html',
-                    status_code=error_code, options=options(),
+                    status_code=error_code, options=db_operations.get_all_liquids_db(),
                     drinks=all_drinks, recipes=all_recipes)
-    
     else:
-        all_drinks, all_recipes, all_liquids = load_drinks_data()
-        return render_template('/admin/add_drink.html', options=options(),
+        all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
+        return render_template('/admin/add_drink.html', options=db_operations.get_all_liquids_db(),
                     drinks=all_drinks, recipes=all_recipes)
 
 @app.route('/admin/drinks/delete/<int:id>')
@@ -237,8 +173,14 @@ def delete(id):
         db.session.delete(rec)
     db.session.delete(drink)
     db.session.commit()
+    
+    # TODO: Fix session problems when using this external function
+    # Session Problems
+    #db_operations.delete_drink_from_db(db, id)
     return redirect('/admin/add_drink')
 
+# TODO: change recipes according to the edit done to the drink. 
+# might be a little bit of work
 @app.route('/admin/drinks/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
     drink = Drink.query.get_or_404(id)
@@ -248,32 +190,20 @@ def edit(id):
         drink.title = request.form['title']
         drink.description = request.form['description']
         db.session.commit()
+        keys = list(request.form.keys())
+        #success_code = db_operations.add_recipe_to_db(db, keys, request, drink_id)
+        #all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
         return redirect('/admin/add_drink')
     else:
-        return render_template('/admin/edit_drink.html', drink=drink, recipe=recipe, all_liquids=all_liquids, options=options())
-
+        return render_template('/admin/edit_drink.html', drink=drink, recipe=recipe, all_liquids=all_liquids, options=db_operations.get_all_liquids_db())
 
 # --- LIQUIDS ---
-
 @app.route('/admin/add_liquid', methods=['GET', 'POST'])
 def add_liquid():
     if request.method == 'POST':
-        name_liquid = request.form['name']
-        description_liquid = request.form['description']
-        category_liquid = request.form['category']
-        alcohol_volume = request.form['alc_volume']
-        
-        new_liquid = Liquid(name=name_liquid, 
-                            alc_category=category_liquid, 
-                            description=description_liquid, 
-                            alc_content=alcohol_volume)
-        db.session.add(new_liquid)
-        db.session.commit()
-        
+        db_operations.add_liquid_to_db(db, request)
         all_liquids = Liquid.query.all()  
-
         return redirect('/admin/add_liquid')
-    
     else:
         all_liquids = Liquid.query.all()
         return render_template('/admin/add_liquid.html', liquids=all_liquids)
@@ -290,27 +220,23 @@ def delete_liquid(id):
     liquid = Liquid.query.get_or_404(id)
     db.session.delete(liquid)
     db.session.commit()
+    
+    # TODO: Get rid of session problems when deleting
+    #db_operations.delete_liquid_from_db(db, id)
     return redirect('/admin/add_liquid')
 
 @app.route('/admin/liquid/edit/<int:id>', methods=['GET', 'POST'])
 def edit_liquid(id):
     liquid = Liquid.query.get_or_404(id)
-    #recipe = Recipe.query.filter_by(id_drink=drink.id).all()
-    #all_liquids = Liquid.query.all()
 
     if request.method == 'POST':
-        liquid.name = request.form['name']
-        liquid.description = request.form['description']
-        liquid.alc_category = request.form['category']
-        liquid.alc_content = request.form['alc_volume']
-        db.session.commit()
+        db_operations.edit_liquid_in_db(liquid, request, db)
         return redirect('/admin/add_liquid')
     else:
         return render_template('/admin/edit_liquid.html', liquid=liquid)
 
 
 # --- DRINK MAKING PROCESS
-
 @app.route('/serving/initiate/select_drink/<int:id>', methods=['GET', 'POST'])
 def start_pouring_process(id):
     if request.method == 'GET':
@@ -333,34 +259,6 @@ def check_glass_placement():
             return render_template('/serving/pouring_process.html')
 
 
-
-########################################################################################################################
-#
-# FUNCTIONS BACKEND 
-#
-########################################################################################################################
-
-
-# handle the pouring process:
-
-
-# handle the site logic
-def print_hello():
-    print("hello")
-
-# tare and handle the scale
-
-# handle the distance sensor
-
-# load all the data needed to display available drinks:
-def load_drinks_data():
-  # get all the data we need to resolve the drinks
-    all_drinks = Drink.query.order_by(Drink.title).all()
-    all_recipes = Recipe.query.all()
-    all_liquids = Liquid.query.all()
-
-    return all_drinks, all_recipes, all_liquids 
-
 ########################################################################################################################
 #
 # FUNCTIONS JINJA
@@ -375,15 +273,6 @@ def get_liquid_by_id(id_liquid_req:int, all_liquids):
     liquid = Liquid.query.filter_by(id=id_liquid_req).first().name
     return liquid
 
-# TODO write a function to get the available drinks with the given bottle configuration
-
-def set_robot_configuration(conf_array):
-    return
-
-def options():
-    liquids = Liquid.query.all()
-    return liquids
-
 # make the functions available for jinja, so they can be called from the html-file.
 app.jinja_env.globals.update(get_recipes_for_drink=get_recipes_for_drink)
 app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
@@ -392,4 +281,3 @@ if __name__== '__main__':
     app.run(debug=True, port=5000 
             # ,host='192.168.1.141'
             ,host='127.0.0.1')
-    
