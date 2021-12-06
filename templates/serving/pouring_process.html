@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Pouring Process</title>
+{% endblock%}
+
+
+{% block body %}
+<h1>Your drink is being prepared</h1>
+<h2>Please be patient, your drink will soon be ready</h2>
+
+<form action='/drinks' method='GET'>
+    <input type="submit" name="cancel_button" value="Cancel">
+</form>
+
+{% endblock %}}

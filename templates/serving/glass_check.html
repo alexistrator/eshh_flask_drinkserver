@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Starting Process</title>
+{% endblock%}
+
+
+{% block body %}
+<h1>Place Glass in marked area</h1>
+
+<h2>Confirm once glass is placed</h2>
+<form action='/serving/initiate/check_glass' method='POST'>
+    <input type="submit" name="continue_button" value="Continue">   
+</form>
+
+{% endblock %}}
+

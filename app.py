@@ -14,6 +14,7 @@ import re
 
 READY = False
 ERROR = False
+BASE_VALUE = 0
 
 
 ########################################################################################################################
@@ -135,6 +136,11 @@ def index():
                 if re.match('^valve', keys[i]):
                     beverages[keys[i]] = selection[keys[i]]
                 # when all is done, change READY to True, or keep it false, if the input is not correct
+
+            # TODO: 
+            # also read the base value of the distance sensor!!
+
+
             READY = True
             print(beverages)
             print(READY)
@@ -299,6 +305,32 @@ def edit_liquid(id):
         return redirect('/admin/add_liquid')
     else:
         return render_template('/admin/edit_liquid.html', liquid=liquid)
+
+
+# --- DRINK MAKING PROCESS
+
+@app.route('/serving/initiate/select_drink/<int:id>', methods=['GET', 'POST'])
+def start_pouring_process(id):
+    if request.method == 'GET':
+        return render_template('/serving/initiation.html', id_drink=id)
+
+@app.route('/serving/initiate/check_glass', methods=['GET', 'POST'])
+def check_glass_placement(id_drink):
+    INSERTED = False
+    if request.method == 'GET':
+        return render_template('/serving/glass_check.html')
+    else:
+        if request.form['continue_button'] == 'Continue':
+            print('checking distance sensor')
+            # get distance sensor value, and compare it to BASE_VALUE
+            # if outside of normal range, confirm glass placement
+            # tare the scale
+            # instead of returning a template, i shoul be redirecting to the pouring process per se
+            # in order to do this, i should look into how sessions work, it's starting to get messy if i have to 
+            # spaghetti pass all variables 
+            return render_template('/serving/pouring_process.html')
+
+
 
 ########################################################################################################################
 #
