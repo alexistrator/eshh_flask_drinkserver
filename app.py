@@ -194,17 +194,16 @@ def add_drink():
             db.session.commit()
 
             drink_id = new_drink.id
-       
-            liquids = {}
             keys = list(request.form.keys())
         
             for i in range(0, len(keys), 2):
                 key = keys[i]
-                if keys[i] not in ['title','description'] and request.form[keys[i + 1]] != "":
+                print(key)
+                if key not in ['title','description'] and request.form[keys[i + 1]] != "":
                     # this is terrible, i should check with regex which case it is, which in turn allows me to
                     # get rid of the stupid if in condition
                     try:
-                        liquid_id = Liquid.query.filter_by(name=request.form[keys[i]]).first().id
+                        liquid_id = Liquid.query.filter_by(name=request.form[key]).first().id
                     except:
                         pass
                     try:
@@ -232,7 +231,10 @@ def add_drink():
 
 @app.route('/admin/drinks/delete/<int:id>')
 def delete(id):
+    recipe = Recipe.query.filter_by(id_drink=id).all()    
     drink = Drink.query.get_or_404(id)
+    for rec in recipe:
+        db.session.delete(rec)
     db.session.delete(drink)
     db.session.commit()
     return redirect('/admin/add_drink')
@@ -315,7 +317,7 @@ def start_pouring_process(id):
         return render_template('/serving/initiation.html', id_drink=id)
 
 @app.route('/serving/initiate/check_glass', methods=['GET', 'POST'])
-def check_glass_placement(id_drink):
+def check_glass_placement():
     INSERTED = False
     if request.method == 'GET':
         return render_template('/serving/glass_check.html')
