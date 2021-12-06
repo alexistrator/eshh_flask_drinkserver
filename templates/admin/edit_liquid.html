@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Edit Liquid</title>
+{% endblock%}
+
+
+{% block body %}
+<h1>Edit Liquid</h1>
+    <form action='/admin/liquid/edit/{{liquid.id}}' method='POST'>
+        Name of Beverage: <input type='text' name='name' id='name', value='{{liquid.name}}' required>
+        <br>
+        Description: <input type='text' name='description' id='description', value='{{liquid.description}}' required>
+        <br>
+        Category: <input type='text' name='category' id='category', value='{{liquid.alc_category}}' required>
+        <br>
+        Alcohol Volume:  <input type='number' name='alc_volume' id='alc_volume', value='{{liquid.alc_content}}' required>
+        <br>
+        <input type='submit' value='Save Liquid'>
+    </form>
+
+{% endblock %}}
+

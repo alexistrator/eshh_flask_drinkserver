@@ -1,1 +1,49 @@
-a
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Edit Drink</title>
+{% endblock%}
+
+
+{% block body %}
+
+    <form action='/admin/drinks/edit/{{drink.id}}' method='POST'>
+        Title: <input type='text' name='title' id='title' value='{{drink.title}}' required>
+        <br>
+        Description: <input type='text' name='description' id='description' value='{{drink.description}}'required>
+        <br>
+        {% for i in range(recipe|length) %}
+            Liquid {{i + 1}}: 
+            <select name="liquid_{{i + 1}}" width="500px">
+                <option value='' SELECTED></option>
+                <option value='{{get_liquid_by_id(recipe[i].id_liquid, all_liquids)}}' SELECTED>{{get_liquid_by_id(recipe[i].id_liquid, all_liquids)}}</option>
+            {% for o in options %}
+                {% if o.name !=  get_liquid_by_id(recipe[i].id_liquid, all_liquids) %}
+                    <option value="{{ o.name }}">{{ o.name }}</option>
+                {% endif %}    
+            {% endfor %}
+            </select>
+                Amount in ml: <input type='text' name='ml_liquid_{{i+1}}' id='ml_liq_{{i+1}}' value='{{ recipe[i].ml_liquid }}'>
+            <br>
+        {% endfor %}
+
+        {% for i in range(recipe|length, 7 - recipe|length) %}
+            Liquid {{i + 1}}: 
+            <select name="liquid_{{i + 1}}" width="500px">
+                <option value='' SELECTED></option>
+                <option value='' SELECTED></option>
+            {% for o in options %}
+                
+                    <option value="{{ o.name }}">{{ o.name }}</option>
+            {% endfor %}
+            </select>
+                Amount in ml: <input type='text' name='ml_liquid_{{i+1}}' id='ml_liq_{{i+1}}'>
+            <br>
+        {% endfor %}
+
+        <br>
+        <input type='submit' value='Save Drink'>
+    </form>
+
+{% endblock %}}
+

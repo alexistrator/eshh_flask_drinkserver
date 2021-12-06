@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Edit Robot Conf</title>
+{% endblock %}
+
+{% block body %}
+<h1> Change the robots drink configuration</h1>
+<hr> 
+<form action='/' method='POST'>
+    {% for i in range(5) %}
+            Tube {{i + 1}}: 
+            <select name="pump_{{i + 1}}" width="500px">
+                <option value="{{beverages['pump_'+(i+1)|string]}}" SELECTED>{{beverages['pump_' +(i+1)|string]}}</option>
+            {% for o in options %}
+                {% if o.name !=  beverages['pump_'+(i+1)|string] %}
+                    <option value="{{ o.name }}">{{ o.name }}</option>
+                {% endif %}    
+            {% endfor %}
+            </select>
+            <br>
+        {% endfor %}
+        Container: 
+        <select name="valve" width="500px">
+            <option value='' SELECTED></option>
+            <option value="{{beverages['valve']}}" SELECTED>{{beverages['valve']}}</option>
+            {% for o in options %}
+                {% if o.name !=  beverages['valve'] %}
+                    <option value="{{ o.name }}">{{ o.name }}</option>
+                {% endif %}
+            {% endfor %}  
+        </select>
+	<br>
+	<input type='submit' value='Resume drinking!'>
+</form>
+<hr>
+{% endblock %}

@@ -21,4 +21,19 @@
 	</form>
 <hr>
 
+<h1> Existing Liquids </h1>
+
+	{% for liquid in liquids  %}
+		
+		<h2>{{ liquid.name }}</h2>
+		{{ liquid.description }}
+		<br>Category: {{ liquid.alc_category }}
+		<br>Alcohol Content: {{ liquid.alc_content }}%
+		<br>
+		<a href='/admin/liquid/delete/{{liquid.id}}'>Delete</a>
+		<a href='/admin/liquid/edit/{{liquid.id}}'>Edit</a>
+		<hr>
+		
+	{% endfor %}
+
 {% endblock %}

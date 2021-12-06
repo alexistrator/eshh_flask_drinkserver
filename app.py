@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, redirect
-from RPi import GPIO
 from flask_sqlalchemy import SQLAlchemy
 import re
+
+# UNCOMMENT IF RUNNING FROM RASPI:
+#from RPi import GPIO
+
 
 ########################################################################################################################
 #
@@ -104,6 +107,7 @@ class Recipe(db.Model):
 #
 ########################################################################################################################
 
+# --- ROBOT CONFIGURATION --
 @app.route('/', methods=['GET', 'POST'])
 def index():
     global READY
@@ -128,14 +132,27 @@ def index():
                 
                 if re.match('^pump', keys[i]):
                     beverages[keys[i]] = selection[keys[i]]
-                if re.match('^vale', keys[i]):
-                    beverages[[i]] = selection[keys[i]]
+                if re.match('^valve', keys[i]):
+                    beverages[keys[i]] = selection[keys[i]]
                 # when all is done, change READY to True, or keep it false, if the input is not correct
             READY = True
             print(beverages)
             print(READY)
             # redirect to /
             return redirect('/')
+
+@app.route('/admin/robot_configuration', methods=['GET', 'POST'])
+def robot_conf():
+    global READY
+
+    if request.method == 'GET':
+        READY = False
+        print(beverages)
+        return render_template('/admin/conf_robot_edit.html', options=options(), beverages=beverages)
+    
+    else:
+        return redirect('/')
+
 
 # --- DRINKS ---
 
@@ -216,14 +233,16 @@ def delete(id):
 
 @app.route('/admin/drinks/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
+    drink = Drink.query.get_or_404(id)
+    recipe = Recipe.query.filter_by(id_drink=drink.id).all()
+    all_liquids = Liquid.query.all()
     if request.method == 'POST':
-        drink = Drink.query.get_or_404(id)
         drink.title = request.form['title']
         drink.description = request.form['description']
         db.session.commit()
         return redirect('/admin/add_drink')
     else:
-        return render_template('/admin/edit_drink.html')
+        return render_template('/admin/edit_drink.html', drink=drink, recipe=recipe, all_liquids=all_liquids, options=options())
 
 
 # --- LIQUIDS ---
@@ -242,11 +261,14 @@ def add_liquid():
                             alc_content=alcohol_volume)
         db.session.add(new_liquid)
         db.session.commit()
+        
+        all_liquids = Liquid.query.all()  
 
         return redirect('/admin/add_liquid')
     
     else:
-        return render_template('/admin/add_liquid.html')
+        all_liquids = Liquid.query.all()
+        return render_template('/admin/add_liquid.html', liquids=all_liquids)
 
 
 @app.route('/liquids')
@@ -254,13 +276,29 @@ def show_liquids():
     all_liquids = Liquid.query.all()
     return render_template('liquids.html', liquids=all_liquids)
    
-@app.route('/admin/configure_liquids', methods=['GET', 'POST'])
-def configure_liquids():
+
+@app.route('/admin/liquid/delete/<int:id>')
+def delete_liquid(id):
+    liquid = Liquid.query.get_or_404(id)
+    db.session.delete(liquid)
+    db.session.commit()
+    return redirect('/admin/add_liquid')
+
+@app.route('/admin/liquid/edit/<int:id>', methods=['GET', 'POST'])
+def edit_liquid(id):
+    liquid = Liquid.query.get_or_404(id)
+    #recipe = Recipe.query.filter_by(id_drink=drink.id).all()
+    #all_liquids = Liquid.query.all()
+
     if request.method == 'POST':
-        return redirect('/admin/configure_liquids')
+        liquid.name = request.form['name']
+        liquid.description = request.form['description']
+        liquid.alc_category = request.form['category']
+        liquid.alc_content = request.form['alc_volume']
+        db.session.commit()
+        return redirect('/admin/add_liquid')
     else:
-        all_liquids = Liquid.query.all()  
-        return render_template('/admin/configure_liquids.html', all_liquids)
+        return render_template('/admin/edit_liquid.html', liquid=liquid)
 
 ########################################################################################################################
 #
@@ -317,5 +355,7 @@ app.jinja_env.globals.update(get_recipes_for_drink=get_recipes_for_drink)
 app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 
 if __name__== '__main__':
-    app.run(debug=True, port=5000, host='192.168.1.141')
+    app.run(debug=True, port=5000 
+            # ,host='192.168.1.141'
+            ,host='127.0.0.1')
     
