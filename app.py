@@ -289,6 +289,7 @@ app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 if __name__== '__main__':
     app.run(debug=True, port=5000 
             # ,host='192.168.1.141'
+            ,host='192.168.223.176'
             ,host='127.0.0.1')
 
 
