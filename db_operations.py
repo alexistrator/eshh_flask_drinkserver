@@ -31,6 +31,20 @@ def add_drink_to_db(db:SQLAlchemy, drink_title, drink_description):
     db.session.commit()
     return new_drink.id
 
+def get_drinks_doable(beverages, all_recipes, all_liquids):
+    
+    doable_drinks = []
+    liquid_ids = []
+    for key in beverages:
+        if beverages[key] != "":
+            liquid_ids.append(Liquid.query.filter_by(name=beverages[key]).first().id)
+    
+    for id in liquid_ids:
+        drink_id = Recipe.query.filter_by(id_liquid=id).first().id_drink
+        doable_drinks.append(Drink.query.filter_by(id=drink_id).first())
+
+    return doable_drinks
+
 def add_recipe_to_db(db, keys, request, drink_id):
     for i in range(0, len(keys), 2):
         key = keys[i]

@@ -137,7 +137,14 @@ def robot_conf():
 @app.route('/drinks')
 def drinks():
     all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
-    return render_template('drinks.html', drinks=all_drinks, recipes=all_recipes)
+    # TODO:
+    # Fix this function.
+    doable_drinks = db_operations.get_drinks_doable(beverages, all_recipes, all_liquids)
+    print(doable_drinks)
+    return render_template('drinks.html'
+                            #drinks=doable_drinks
+                            ,drinks=all_drinks 
+                            ,recipes=all_recipes)
 
 @app.route('/admin/add_drink', methods=['GET', 'POST'])
 def add_drink():
@@ -228,7 +235,6 @@ def delete_liquid(id):
 @app.route('/admin/liquid/edit/<int:id>', methods=['GET', 'POST'])
 def edit_liquid(id):
     liquid = Liquid.query.get_or_404(id)
-
     if request.method == 'POST':
         db_operations.edit_liquid_in_db(liquid, request, db)
         return redirect('/admin/add_liquid')
@@ -266,7 +272,10 @@ def check_glass_placement():
 ########################################################################################################################
 
 def get_recipes_for_drink(id_drink_req:int, all_recipes):
-    all_recipes = Recipe.query.filter_by(id_drink=id_drink_req).all()
+    try:
+        all_recipes = Recipe.query.filter_by(id_drink=id_drink_req).all()
+    except:
+        all_recipes = []
     return all_recipes
 
 def get_liquid_by_id(id_liquid_req:int, all_liquids):
@@ -281,3 +290,5 @@ if __name__== '__main__':
     app.run(debug=True, port=5000 
             # ,host='192.168.1.141'
             ,host='127.0.0.1')
+
+
