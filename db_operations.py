@@ -38,11 +38,14 @@ def get_drinks_doable(beverages, all_recipes, all_liquids):
     for key in beverages:
         if beverages[key] != "":
             liquid_ids.append(Liquid.query.filter_by(name=beverages[key]).first().id)
-    
     for id in liquid_ids:
-        drink_id = Recipe.query.filter_by(id_liquid=id).first().id_drink
-        doable_drinks.append(Drink.query.filter_by(id=drink_id).first())
-
+        try:
+            drink_id = Recipe.query.filter_by(id_liquid=id).first().id_drink
+            if drink_id is not None:
+                doable_drinks.append(Drink.query.filter_by(id=drink_id).first())
+        except:
+            print('there were no doable drinks')
+    print(doable_drinks) 
     return doable_drinks
 
 def add_recipe_to_db(db, keys, request, drink_id):

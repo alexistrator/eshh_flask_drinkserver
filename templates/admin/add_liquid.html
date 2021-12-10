@@ -7,7 +7,6 @@
 {% block body %}
 <h1> Add a new liquid to the database </h1>
 
-<hr> 
 <form action='/admin/add_liquid' method='POST'>
 	Name of Beverage: <input type='text' name='name' id='name' required>
 	<br>
@@ -17,11 +16,12 @@
 	<br>
 	Alcohol Volume:  <input type='number' name='alc_volume' id='alc_volume' required>
 	<br>
-	<input type='submit' value='Add Liquid'>
-	</form>
+	<input class="have_drink" type='submit' value='Add Liquid'>
+</form>
 <hr>
 
 <h1> Existing Liquids </h1>
+<hr>
 
 	{% for liquid in liquids  %}
 		
@@ -30,8 +30,12 @@
 		<br>Category: {{ liquid.alc_category }}
 		<br>Alcohol Content: {{ liquid.alc_content }}%
 		<br>
-		<a href='/admin/liquid/delete/{{liquid.id}}'>Delete</a>
-		<a href='/admin/liquid/edit/{{liquid.id}}'>Edit</a>
+		<form class="edit_drink" action='/admin/liquid/edit/{{liquid.id}}'>
+			<input type="submit" value="Edit" />
+		</form>
+		<form class="delete_drink" action='/admin/liquid/delete/{{liquid.id}}'>
+			<input type="submit" value="Delete" />
+		</form>
 		<hr>
 		
 	{% endfor %}

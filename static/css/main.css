@@ -1,8 +1,12 @@
-
+@import url('http://fonts.cdnfonts.com/css/common-pixel');
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 html, body {
 	margin: 100;
 	padding: 100;
-  }
+	font-family: 'VT323', monospace; 
+	font-size: large;
+ }
+
   canvas {
 	width: 100%;
 	height: 100%;
@@ -12,14 +16,13 @@ html, body {
 	left: 0;
 	z-index: -9999;
 	overflow: scroll;
-
   }
 
 body {
-	font-family: "Helvetica";
 	color: white;
 	background-color: black;
 }
+
 
 input[type="text"]
 {
@@ -30,7 +33,19 @@ input[type="text"]
 .main_div {
 	overflow: scroll;
 	height:100vh;
+	width: 80%;
+	margin-left: auto;
+	margin-right: auto;
+	border: 1px dotted white;
+	box-sizing: border-box;
+	padding: 10px;
+
+
 }
+
+hr {
+	border-top: 0.5px dotted white;
+  }
 
 canvas{
 	height: 100%;
@@ -38,18 +53,25 @@ canvas{
 
 /* Add a black background color to the top navigation */
 .topnav {
-	background-color: #333;
+    background: transparent;
 	overflow: hidden;
+	font-size: x-large;
+	margin-right: auto;
+	margin-left: auto;
+	text-align: center;
+	align-items: center;
+
   }
   
   /* Style the links inside the navigation bar */
   .topnav a {
-	float: left;
+	/*float: left;*/
 	color: #f2f2f2;
 	text-align: center;
 	padding: 14px 16px;
 	text-decoration: none;
-	font-size: 17px;
+	font-size: 26px;
+	margin: auto;
   }
   
   /* Change the color of links on hover */
@@ -59,7 +81,76 @@ canvas{
   }
   
   /* Add a color to the active/current link */
+  /*
   .topnav a.active {
 	background-color: #04AA6D;
 	color: white;
   }
+  */
+
+  form{
+	display: inline;
+
+  }
+ 
+.have_drink input:hover{
+	background-color: #04AA6D; /* Green */
+	color: white;
+  }
+
+.have_drink [type='form']:hover{
+	background-color: #04AA6D; /* Green */
+	color: white;
+  }
+
+.edit_drink [type='submit']{
+	background-color: #04AA6D; /* Green */
+	color: white;
+	border:1px solid white;
+	display: inline;
+	
+}
+
+.delete_drink [type='submit']{
+	background-color: red; /* Green */
+	color: white;
+	border:1px solid white;
+	display: inline;
+	
+}
+
+input[type="text"]
+{
+    background: transparent;
+	border:1px solid #04AA6D;
+	border-radius: 5px;
+	color: white;
+}
+
+input[type="number"]
+{
+    background: transparent;
+	border:1px solid #04AA6D;
+	border-radius: 5px;
+	color: white;
+}
+
+input[type="submit"]
+{
+    background: transparent;
+	border:1px solid #04AA6D;
+	color: white;
+	border-radius: 5px;
+	font-family: 'VT323', monospace; 
+	font-size: large;
+}
+
+
+select
+{
+	color: white;
+    background: transparent;
+	border:1px solid #04AA6D;
+}
+
+

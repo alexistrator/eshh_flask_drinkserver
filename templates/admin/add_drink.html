@@ -7,7 +7,6 @@
 {% block body %}
 <h1> Add a new drink to the database </h1>
 
-<hr> 
 <form action='/admin/add_drink' method='POST'>
 	Title: <input type='text' name='title' id='title' required>
 	<br>
@@ -30,17 +29,21 @@
 <h3>{{status_code}}</h3>
 
 <h2>Available Drinks</h2>
+<hr>
 	{% for drink in drinks %}
 		<h2>{{ drink.title }}</h2>
 		<p>{{ drink.description }}</p>
-		<br>
 		{% for recipe in get_recipes_for_drink(drink.id, all_recipes) %}
 			<b>{{get_liquid_by_id(recipe.id_liquid, all_liquids)}}:</b> {{recipe.ml_liquid}}ml
 			<br>
 		{% endfor %}
 		<br>
-		<a href='/admin/drinks/delete/{{drink.id}}'>Delete</a>
-		<a href='/admin/drinks/edit/{{drink.id}}'>Edit</a>
+		<form class="edit_drink" action='/admin/drinks/edit/{{drink.id}}'>
+			<input type="submit" value="Edit" />
+		</form>
+		<form class="delete_drink" action='/admin/drinks/delete/{{drink.id}}'>
+			<input type="submit" value="Delete" />
+		</form>
 		<hr>
 	{% endfor %}
 {% endblock %}

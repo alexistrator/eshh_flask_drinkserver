@@ -140,10 +140,9 @@ def drinks():
     # TODO:
     # Fix this function.
     doable_drinks = db_operations.get_drinks_doable(beverages, all_recipes, all_liquids)
-    print(doable_drinks)
     return render_template('drinks.html'
                             #drinks=doable_drinks
-                            ,drinks=all_drinks 
+                            ,drinks=doable_drinks 
                             ,recipes=all_recipes)
 
 @app.route('/admin/add_drink', methods=['GET', 'POST'])
@@ -289,7 +288,9 @@ app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 if __name__== '__main__':
     app.run(debug=True, port=5000 
             # ,host='192.168.1.141'
-            ,host='192.168.223.176'
-            ,host='127.0.0.1')
+            #,host='192.168.223.176'
+            #,host='192.168.223.211'
+            ,host='127.0.0.1'
+            )
 
 

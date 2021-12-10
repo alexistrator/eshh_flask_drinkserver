@@ -147,7 +147,7 @@ function mouseMoved() {
 
 
 function keyPressed() {
-  useFill = ! useFill;
+  //useFill = ! useFill;
 }
 
 function getRandomInt(max) {
