@@ -58,8 +58,8 @@ function Particle(x, y, level) {
 
 function setup() {
   canvas = createCanvas(windowWidth, windowHeight);
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth + 100;
+  canvas.height = window.innerHeight + 200;
   //canvas.style.position = 'fixed';
   canvas.position(0,0);
   canvas.style('z-index', '-1');

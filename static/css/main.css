@@ -17,7 +17,14 @@ html, body {
 
 body {
 	font-family: "Helvetica";
-	color: white
+	color: white;
+	background-color: black;
+}
+
+input[type="text"]
+{
+    background: transparent;
+    border: white;
 }
 
 .main_div {
