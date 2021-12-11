@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 import re
 import db_operations
+import pouring_operations
 
 # UNCOMMENT IF RUNNING FROM RASPI:
 #from RPi import GPIO
@@ -137,11 +138,8 @@ def robot_conf():
 @app.route('/drinks')
 def drinks():
     all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
-    # TODO:
-    # Fix this function.
     doable_drinks = db_operations.get_drinks_doable(beverages, all_recipes, all_liquids)
     return render_template('drinks.html'
-                            #drinks=doable_drinks
                             ,drinks=doable_drinks 
                             ,recipes=all_recipes)
 
@@ -162,7 +160,8 @@ def add_drink():
                     drinks=all_drinks, recipes=all_recipes)
         else:
             print("did nothing, drink already exists")
-            error_code = "drink already exists, get rekt noob"
+            error_code = "Drink with this title already exists. Be creative"
+            # TODO: Keep the configuration I was trying to add. This is a nice to have. No Priority.
             return render_template('/admin/add_drink.html',
                     status_code=error_code, options=db_operations.get_all_liquids_db(),
                     drinks=all_drinks, recipes=all_recipes)
@@ -179,7 +178,6 @@ def delete(id):
         db.session.delete(rec)
     db.session.delete(drink)
     db.session.commit()
-    
     # TODO: Fix session problems when using this external function
     # Session Problems
     #db_operations.delete_drink_from_db(db, id)
@@ -197,8 +195,15 @@ def edit(id):
         drink.description = request.form['description']
         db.session.commit()
         keys = list(request.form.keys())
-        #success_code = db_operations.add_recipe_to_db(db, keys, request, drink_id)
-        #all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
+        # delete the current recipes available
+        for rec in recipe:
+            print('deleting:')
+            print(rec.id_liquid)
+            db.session.delete(rec)
+        # commit the deletion
+        db.session.commit()
+        # generate new recipe for the drink
+        db_operations.add_recipe_to_db(db, keys, request, drink.id)
         return redirect('/admin/add_drink')
     else:
         return render_template('/admin/edit_drink.html', drink=drink, recipe=recipe, all_liquids=all_liquids, options=db_operations.get_all_liquids_db())

@@ -31,8 +31,7 @@ def add_drink_to_db(db:SQLAlchemy, drink_title, drink_description):
     db.session.commit()
     return new_drink.id
 
-# TODO turn this query into an AND and not and OR statement. All required liquids have
-# to be present, not just a few of them
+# this function is a mess but it seems to get the job done, which is fine by me for the moment
 def get_drinks_doable(beverages, all_recipes, all_liquids):
     doable_drinks = []
     liquid_ids = []
@@ -51,7 +50,6 @@ def get_drinks_doable(beverages, all_recipes, all_liquids):
                     drink_id_from_recipe = recipe.id_drink
                     drink_recipe = Recipe.query.filter_by(id_drink=drink_id_from_recipe).all()
                     all_drinks_liquids = [i.id_liquid for i in drink_recipe]
-                    print(all_drinks_liquids)
                     if set(all_drinks_liquids).issubset(set(liquid_ids)):
                         stuff = Drink.query.filter_by(id=recipe.id_drink).first()
                         if stuff is not None and stuff not in doable_drinks:
@@ -59,7 +57,6 @@ def get_drinks_doable(beverages, all_recipes, all_liquids):
         except Exception as e:
             print(e)
             print('there were no doable drinks')
-    #print(doable_drinks) 
     return doable_drinks
 
 def add_recipe_to_db(db, keys, request, drink_id):
@@ -79,7 +76,7 @@ def add_recipe_to_db(db, keys, request, drink_id):
             new_recipe = Recipe(id_drink= drink_id, id_liquid= liquid_id, ml_liquid=liquid_amount)
             db.session.add(new_recipe)
             db.session.commit()
-    success_code = "added the fucking drink, let's get wasted now!!"
+    success_code = "Drink added successfully. Let's drink!"
     return success_code
 
 # der boi funktioniert wegen session probleme nicht
@@ -87,6 +84,8 @@ def delete_drink_from_db(db, id):
     recipe = Recipe.query.filter_by(id_drink=id).all()    
     drink = Drink.query.get_or_404(id)
     for rec in recipe:
+        print('deleting:')
+        print(rec.id_liquid)
         db.session.delete(rec)
     db.session.delete(drink)
     db.session.commit()

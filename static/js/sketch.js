@@ -4,10 +4,6 @@ Frozen brush
 Makes use of a delaunay algorithm to create crystal-like shapes.
 I did NOT develop delaunay.js, and not sure who the author really is to give proper credit.
 
-Controls:
-	- Drag the mouse.
-    - Press any key to toggle between fill and stroke.
-
 Inspired by:
 	Makio135's sketch www.openprocessing.org/sketch/385808
 
@@ -24,7 +20,6 @@ var maxLevel = 10;
 var useFill = false;
 
 var data = [];
-
 
 // Moves to a random direction and comes to a stop.
 // Spawns other particles within its lifetime.
@@ -132,16 +127,13 @@ function draw() {
                p3.pos.x, p3.pos.y);
     }
   }
-  
   noStroke();
   fill(255);
-  // text("Click and drag the mouse\nPress any key to change to fill/stroke", width/2, height-50);
 }
 
 
 
-function mouseMoved() {
-  
+function mouseMoved() { 
   //allParticles.push(new Particle(mouseX, mouseY, maxLevel));
 }
 
@@ -156,13 +148,9 @@ function getRandomInt(max) {
 
 
 setInterval(function generate(){
-   // do some stuff
    var maxLevel = 5;
-   
    x = getRandomInt(window.innerWidth)
    y = getRandomInt(window.innerHeight)
    allParticles.push(new Particle(x, y, maxLevel));
-  
-   
 }, 200)
 
