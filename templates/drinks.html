@@ -7,9 +7,7 @@
 {% block body %}
 <h1> All Drinks </h1>
 <hr>
-
 	{% for drink in drinks %}
-		
 		<h2>{{ drink.title  }}</h2>
 		<p>{{ drink.description }}</p>
 		{% for recipe in get_recipes_for_drink(drink.id, all_recipes)  %}
@@ -20,7 +18,6 @@
 		<form class="have_drink" action='/serving/initiate/select_drink/{{drink.id}}'>
 			<input type="submit" value="I'll have this one" />
 		</form>
-
 		<hr>
 	{% endfor %}
 

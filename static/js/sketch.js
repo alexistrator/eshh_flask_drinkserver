@@ -20,7 +20,7 @@ Site:
 
 var canvas;
 var allParticles = [];
-var maxLevel = 5;
+var maxLevel = 10;
 var useFill = false;
 
 var data = [];
@@ -158,11 +158,11 @@ function getRandomInt(max) {
 setInterval(function generate(){
    // do some stuff
    var maxLevel = 5;
-
+   
    x = getRandomInt(window.innerWidth)
    y = getRandomInt(window.innerHeight)
    allParticles.push(new Particle(x, y, maxLevel));
   
    
-}, 100)
+}, 200)
 

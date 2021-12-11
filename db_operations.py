@@ -31,21 +31,35 @@ def add_drink_to_db(db:SQLAlchemy, drink_title, drink_description):
     db.session.commit()
     return new_drink.id
 
+# TODO turn this query into an AND and not and OR statement. All required liquids have
+# to be present, not just a few of them
 def get_drinks_doable(beverages, all_recipes, all_liquids):
-    
     doable_drinks = []
     liquid_ids = []
     for key in beverages:
         if beverages[key] != "":
+            # these are all the liquids the automat can serve with the actual conf
             liquid_ids.append(Liquid.query.filter_by(name=beverages[key]).first().id)
+    
     for id in liquid_ids:
         try:
-            drink_id = Recipe.query.filter_by(id_liquid=id).first().id_drink
+            # all potential drinks containin that liquid
+            drink_id = Recipe.query.filter_by(id_liquid=id).all()
+            # check if the drink has all needed ingredients
             if drink_id is not None:
-                doable_drinks.append(Drink.query.filter_by(id=drink_id).first())
-        except:
+                for recipe in drink_id:
+                    drink_id_from_recipe = recipe.id_drink
+                    drink_recipe = Recipe.query.filter_by(id_drink=drink_id_from_recipe).all()
+                    all_drinks_liquids = [i.id_liquid for i in drink_recipe]
+                    print(all_drinks_liquids)
+                    if set(all_drinks_liquids).issubset(set(liquid_ids)):
+                        stuff = Drink.query.filter_by(id=recipe.id_drink).first()
+                        if stuff is not None and stuff not in doable_drinks:
+                            doable_drinks.append(stuff)
+        except Exception as e:
+            print(e)
             print('there were no doable drinks')
-    print(doable_drinks) 
+    #print(doable_drinks) 
     return doable_drinks
 
 def add_recipe_to_db(db, keys, request, drink_id):
