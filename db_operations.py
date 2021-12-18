@@ -1,20 +1,54 @@
 import re
-
 from flask_sqlalchemy import SQLAlchemy
 from app import Drink, Recipe, Liquid
 
-def set_current_tube_conf(request, beverages):
-    selection = request.form
-    keys = list(selection.keys())
-    print(keys)
-    for i in range(0,len(keys)):
-        if re.match('^pump', keys[i]):
-            beverages[keys[i]] = selection[keys[i]]
-            if re.match('^valve', keys[i]):
-                beverages[keys[i]] = selection[keys[i]]
-                # when all is done, change READY to True, or keep it false, if the input is not correct
-    return beverages
+########################################################################################################################
+#
+# LIQUIDS
+#
+########################################################################################################################
 
+def get_liduid_by_id(id:int):
+    liquid_name = Liquid.query.filter_by(id=id).first().name
+    return liquid_name
+
+def add_liquid_to_db(db, request):
+    name_liquid = request.form['name']
+    description_liquid = request.form['description']
+    category_liquid = request.form['category']
+    alcohol_volume = request.form['alc_volume']
+        
+    new_liquid = Liquid(name=name_liquid, 
+                            alc_category=category_liquid, 
+                            description=description_liquid, 
+                            alc_content=alcohol_volume)
+    db.session.add(new_liquid)
+    db.session.commit()
+
+# TODO PRIO2 get rid of sessions problems that hinder this function from working
+def delete_liquid_from_db(db, id):
+    liquid = Liquid.query.get_or_404(id)
+    db.session.delete(liquid)
+    db.session.commit()    
+
+def edit_liquid_in_db(liquid, request, db):
+    liquid.name = request.form['name']
+    liquid.description = request.form['description']
+    liquid.alc_category = request.form['category']
+    liquid.alc_content = request.form['alc_volume']
+    db.session.commit()    
+
+def get_all_liquids_db():
+    liquids = Liquid.query.all()
+    return liquids
+
+########################################################################################################################
+#
+# DRINKS OPERATIONS
+#
+########################################################################################################################
+
+# returns all the data needed to display drinks on the front end
 def get_data_for_drinks():
     all_drinks = Drink.query.order_by(Drink.title).all()
     all_recipes = Recipe.query.all()
@@ -22,16 +56,22 @@ def get_data_for_drinks():
 
     return all_drinks, all_recipes, all_liquids
 
+# is used when adding a new drink - will return True if is duplicate
 def check_drink_duplicates(drink_title):
-    return Drink.query.filter_by(title=drink_title).all()
+    duplicates = Drink.query.filter_by(title=drink_title).all()
+    if len(duplicates) > 0:
+        return True
+    else:
+        return False
 
+# is used to add a new drink-row to the Drink-Table    
 def add_drink_to_db(db:SQLAlchemy, drink_title, drink_description):
     new_drink = Drink(title=drink_title, description=drink_description)
     db.session.add(new_drink)
     db.session.commit()
     return new_drink.id
 
-# this function is a mess but it seems to get the job done, which is fine by me for the moment
+# returns the drinks that can be made with the current configuration
 def get_drinks_doable(beverages, all_recipes, all_liquids):
     doable_drinks = []
     liquid_ids = []
@@ -59,6 +99,7 @@ def get_drinks_doable(beverages, all_recipes, all_liquids):
             print('there were no doable drinks')
     return doable_drinks
 
+# adds new recipe-rows to the recipe table. As many as there are ingredients in a drink.
 def add_recipe_to_db(db, keys, request, drink_id):
     for i in range(0, len(keys), 2):
         key = keys[i]
@@ -79,7 +120,8 @@ def add_recipe_to_db(db, keys, request, drink_id):
     success_code = "Drink added successfully. Let's drink!"
     return success_code
 
-# der boi funktioniert wegen session probleme nicht
+# doesn't work from here due to session problems. Is located in app.py, but should come over here once we have time to
+# fix this
 def delete_drink_from_db(db, id):
     recipe = Recipe.query.filter_by(id_drink=id).all()    
     drink = Drink.query.get_or_404(id)
@@ -90,37 +132,45 @@ def delete_drink_from_db(db, id):
     db.session.delete(drink)
     db.session.commit()
 
+# edits the drink row of a certain drink in the drink-table
 def edit_drink_from_db(db, request, drink):
     drink.title = request.form['title']
     drink.description = request.form['description']
     db.session.commit()    
 
-def add_liquid_to_db(db, request):
-    name_liquid = request.form['name']
-    description_liquid = request.form['description']
-    category_liquid = request.form['category']
-    alcohol_volume = request.form['alc_volume']
-        
-    new_liquid = Liquid(name=name_liquid, 
-                            alc_category=category_liquid, 
-                            description=description_liquid, 
-                            alc_content=alcohol_volume)
-    db.session.add(new_liquid)
-    db.session.commit()
+########################################################################################################################
+#
+# RECIPES OPERATIONS
+#
+########################################################################################################################
 
-# TODO: get rid of sessions problems that hinder this function from working
-def delete_liquid_from_db(db, id):
-    liquid = Liquid.query.get_or_404(id)
-    db.session.delete(liquid)
-    db.session.commit()    
+# gets all the recipe rows that match a drinks id
+def get_recipe_for_drink(id:int):
+    # write a function that gets the recipe for a given drink id
+    recipe = Recipe.query.filter_by(id_drink=id).all()
+    return recipe
 
-def edit_liquid_in_db(liquid, request, db):
-    liquid.name = request.form['name']
-    liquid.description = request.form['description']
-    liquid.alc_category = request.form['category']
-    liquid.alc_content = request.form['alc_volume']
-    db.session.commit()    
+########################################################################################################################
+#
+# TUBE CONFIGURATIONS
+#
+########################################################################################################################
 
-def get_all_liquids_db():
-    liquids = Liquid.query.all()
-    return liquids
+# is used whenever we make changes to the tube configuration. Loads the previous one, overwrite with the new one, keeping
+# untouched old configurations 
+def set_current_tube_conf(request, beverages):
+    selection = request.form
+    keys = list(selection.keys())
+    print(beverages)
+    for i in range(0,len(keys)):
+        if re.match('^pump', keys[i]):
+            beverages[keys[i]] = selection[keys[i]]
+        if re.match('^valve', keys[i]):
+            beverages[keys[i]] = selection[keys[i]]
+            # when all is done, change READY to True, or keep it false, if the input is not correct
+    return beverages
+
+
+
+
+

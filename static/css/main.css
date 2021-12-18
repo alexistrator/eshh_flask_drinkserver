@@ -39,8 +39,7 @@ input[type="text"]
 	border: 1px dotted white;
 	box-sizing: border-box;
 	padding: 10px;
-
-
+	background-color: rgba(0, 0, 0, 0.4);
 }
 
 hr {
