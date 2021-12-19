@@ -11,10 +11,10 @@
 		<h2>{{ gpio }}</h2>
 		<p> This activates pin: {{ gpio_settings[gpio]}} </p>
 		<br>    
-        <form class="edit_drink" action='/admin/pump_action/{{gpio}}'>
+        <form class="edit_drink" action='/admin/pump_action/{{gpio}}' method='POST'>
             <input type="submit" value="Start" />
         </form>
-        <form class="delete_drink" action='/admin/pump_action/{{gpio}}'>
+        <form class="delete_drink" action='/admin/pump_action/{{gpio}}' method='POST'> 
             <input type="submit" value="Stop" />
         </form>
         <hr>
