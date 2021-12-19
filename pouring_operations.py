@@ -32,12 +32,7 @@ else:
 hx = HX711(5, 6)
 hx.set_reading_format("MSB", "MSB")
 hx.set_reference_unit(491)
-
-def tare_scale():
-    hx.reset()
-    hx.tare()
-    print("Tare done! Add weight now...")
-
+    
 
 # distance sensor - configure the distance sensor environment
 standard_value = 0
@@ -225,6 +220,9 @@ def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml
     # now, the pouring process just does its job, which i need to configure here.
     drink_id = session['wants_drink_id']
     recipes = db_operations.get_recipe_for_drink(drink_id)
+    hx.reset()
+    hx.tare()
+    print("Tare done! Add weight now...")
 
 
     for recipe in recipes:
