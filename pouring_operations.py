@@ -24,9 +24,8 @@ def initiate_hardware():
 EMULATE_HX711=False
 if not EMULATE_HX711:
     # uncomment line below when running from raspi
-    import RPi.GPIO as GPIO
     from hx711 import HX711
-    print('hello')
+    print('hello from hx711')
 else:
     print('sounds nice doesnt work')
 hx = HX711(5, 6)
