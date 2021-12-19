@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import re
 import db_operations
 import pouring_operations
+import multiprocessing as mp
 
 # UNCOMMENT IF RUNNING FROM RASPI:
 #from RPi import GPIO
@@ -72,8 +73,8 @@ gpio_settings = {
         "pump_5":       5,
         "valve":        6,
         "scale_out":    7,
-        "scale_in1":    8,
-        "scale_in2":    9,
+        "scale_in_DT":  5,
+        "scale_in_SCK": 6,
         "distance1":    10,
         "distance2":    11,
         "distance3":    12,
@@ -385,8 +386,7 @@ if __name__== '__main__':
             # ,host='192.168.1.141'
             #,host='192.168.223.176'
             #,host='192.168.223.211'
-            #,host='127.0.0.1'
-		,host='192.168.69.203'
+            ,host='127.0.0.1'
             )
 
 

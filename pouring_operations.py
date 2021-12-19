@@ -22,18 +22,16 @@ def initiate_hardware():
 # TODO PRIO2 check if this works on the raspberry pi
 # TODO PRIO2 add the files needed to make the scale work to my git, referencing to the guy who posted them
 EMULATE_HX711=False
-referenceUnit = 1
 if not EMULATE_HX711:
     # uncomment line below when running from raspi
     import RPi.GPIO as GPIO
     from hx711 import HX711
     print('hello')
 else:
-    #from emulated_hx711 import HX711
-    print('hello')
-#hx = HX711(5, 6)
-#hx.set_reading_format("MSB", "MSB")
-#hx.set_reference_unit(referenceUnit)
+    print('sounds nice doesnt work')
+hx = HX711(5, 6)
+hx.set_reading_format("MSB", "MSB")
+hx.set_reference_unit(491)
 
 # distance sensor - configure the distance sensor environment
 standard_value = 0
@@ -109,30 +107,15 @@ def tare_scale():
 
 # TODO Prio 1
 # This will return the current scale value
-def get_scale_value():
+def get_scale_value(gpio_settings):
     # 1 - start up scale
     # 2 - read in current value
     # 3 - return that value
     scale_value = 0
 
     try:
-        # These three lines are usefull to debug wether to use MSB or LSB in the reading formats
-        # for the first parameter of "hx.set_reading_format("LSB", "MSB")".
-        # Comment the two lines "val = hx.get_weight(5)" and "print val" and uncomment these three lines to see what it prints.
-        
-        # np_arr8_string = hx.get_np_arr8_string()
-        # binary_string = hx.get_binary_string()
-        # print binary_string + " " + np_arr8_string
-        
-        # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
-        val = hx.get_weight(5)
+        val = hx.get_weight(gpio_settings['scale_in_DT'])
         print(val)
-
-        # To get weight from both channels (if you have load cells hooked up 
-        # to both channel A and B), do something like this
-        #val_A = hx.get_weight_A(5)
-        #val_B = hx.get_weight_B(5)
-        #print "A: %s  B: %s" % ( val_A, val_B )
 
         hx.power_down()
         hx.power_up()
@@ -184,9 +167,10 @@ def ansaugen_single_tube(gpio_to_ansaug):
 #
 ########################################################################################################################
 
-def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap):
+def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings):
 
     time_s = round(amount_ml/extraction_cap, 0)
+    time_s = 20
     print(time_s)
     time_c = 0 
     keep_going = True
@@ -204,10 +188,11 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap):
     time_c += 1
 
     while time_c <= time_s:
-        #scale = get_scale_value()
-        scale=0
+        scale = get_scale_value(gpio_settings)
+        print(scale)
+        time_c+=1
         # approximation with +/- 20% - let's try it like this
-        if scale <= time_c*extraction_cap*1.2 and scale >= time_c*extraction_cap*0.8:
+        """ if scale <= time_c*extraction_cap*1.2 and scale >= time_c*extraction_cap*0.8:
             keep_going = True
             # time.sleep(1)
             time_c += 1
@@ -224,7 +209,7 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap):
                 #TODO PRIO1 - Handle this
 
                 break
-            break
+            break """
         
 
 
@@ -245,7 +230,7 @@ def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml
         extraction_cap = extraction_cap_ml_s[outlet]
         gpio_pin = gpio_settings[outlet]
 
-        pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap )
+        pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings )
 
 
     return True
