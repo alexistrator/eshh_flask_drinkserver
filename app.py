@@ -4,6 +4,7 @@ import re
 import db_operations
 import pouring_operations
 import multiprocessing as mp
+import time
 
 # UNCOMMENT IF RUNNING FROM RASPI:
 import RPi.GPIO as GPIO
@@ -95,6 +96,7 @@ gpio_settings = {
 # Setup and stuff:
 
 GPIO.cleanup()
+time.sleep(1)
 GPIO.setmode(GPIO.BCM)
 
 for key, value in gpio_settings.items():
@@ -173,7 +175,7 @@ def index():
 
     if READY and request.method == 'GET':
         # ansaugen all the set beverages
-        #pouring_operations.ansaugen_all_tubes(gpio_settings, beverages, ansaug_times)
+        # pouring_operations.ansaugen_all_tubes(gpio_settings, beverages, ansaug_times)
         # pouring_operations.initiate_hardware()
         return redirect('/drinks')
     elif request.method == 'GET':
@@ -420,11 +422,11 @@ def pump_action2(gpio):
         if request.form['button'] == "Start":
             # turn gpio on
             print('Start: ' + str(gpio))
-            GPIO.output( gpio_settings[str(gpio)], True )
+            GPIO.output( gpio_settings[str(gpio)], GPIO.HIGH )
             pass
         if request.form['button'] == "Stop":
             print('Stop: ' + str(gpio))
-            GPIO.output( gpio_settings[str(gpio)], False )
+            GPIO.output( gpio_settings[str(gpio)], GPIO.LOW )
             # turn gpio off
             pass
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
