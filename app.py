@@ -92,8 +92,9 @@ def setup_gpio():
     GPIO.setmode(GPIO.BOARD)
 
     for key, value in gpio_settings.items():
-        if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key):  
-            GPIO.setup(value, GPIO.OUT)
+        if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key): 
+            if value != 0: 
+                GPIO.setup(value, GPIO.OUT)
     print('i did set up the gpios')
         # if is scale
             # GPIO.setup(value, GPIO.OUT)
