@@ -86,6 +86,7 @@ gpio_settings = {
 # Setup and stuff:
 
 def setup_gpio():
+    GPIO.cleanup()
     global GPIO
     GPIO.setmode(GPIO.BOARD)
 
