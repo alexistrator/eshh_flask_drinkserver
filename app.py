@@ -414,7 +414,7 @@ def pump_action2(gpio):
     if request.method == 'GET':
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
     else:
-        print('hello')
+        print('hello, THIS IS PUMP ACTION')
         print(request.form)
         if request.form['button'] == "Start":
             # turn gpio on
