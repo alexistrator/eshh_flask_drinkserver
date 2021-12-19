@@ -6,7 +6,7 @@ import pouring_operations
 import multiprocessing as mp
 
 # UNCOMMENT IF RUNNING FROM RASPI:
-#from RPi import GPIO
+from RPi import GPIO
 
 ########################################################################################################################
 #
@@ -66,21 +66,21 @@ ansaug_times = {
 # TODO PRIO1 set the right GPIOS
 
 gpio_settings = {
-        "pump_1":       1,
-        "pump_2":       2,
-        "pump_3":       3,
-        "pump_4":       4,
-        "pump_5":       5,
-        "valve":        6,
-        "scale_out":    7,
+        "pump_1":       20,
+        "pump_2":       16,
+        "pump_3":       12,
+        "pump_4":       0,
+        "pump_5":       0,
+        "valve":        21,
+        "scale_out":    0,
         "scale_in_DT":  5,
         "scale_in_SCK": 6,
-        "distance1":    10,
-        "distance2":    11,
-        "distance3":    12,
-        "rgb1":         13,
-        "rgb2":         14,
-        "rgb3":         15
+        "distance1":    0,
+        "distance2":    0,
+        "distance3":    0,
+        "rgb1":         0,
+        "rgb2":         0,
+        "rgb3":         0
         }
 
 # Setup and stuff:
@@ -385,7 +385,7 @@ app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 # checks if glass was placed, and handles the whole pouring process. Should be renamed.
 @app.route('/admin/pump_action', methods=['GET'])
 def pump_action1():
-    global gpio_settings, beverages, extraction_cap_ml_s
+    global gpio_settings, beverages, extraction_cap_ml_s, GPIO
 
     if request.method == 'GET':
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
@@ -404,9 +404,11 @@ def pump_action2(gpio):
         if request.form['button'] == "Start":
             # turn gpio on
             print('Start: ' + str(gpio))
+            GPIO.output( gpio_settings[str(gpio)], True )
             pass
         if request.form['button'] == "Stop":
             print('Stop: ' + str(gpio))
+            GPIO.output( gpio_settings[str(gpio)], False )
             # turn gpio off
             pass
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
