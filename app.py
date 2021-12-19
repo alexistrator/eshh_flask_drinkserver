@@ -95,6 +95,7 @@ def setup_gpio():
         if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key): 
             if value != 0: 
                 GPIO.setup(value, GPIO.OUT)
+                GPIO.output( value, False )
     print('i did set up the gpios')
         # if is scale
             # GPIO.setup(value, GPIO.OUT)
@@ -161,7 +162,7 @@ def index():
 
     if READY and request.method == 'GET':
         # ansaugen all the set beverages
-        pouring_operations.ansaugen_all_tubes(gpio_settings, beverages, ansaug_times)
+        #pouring_operations.ansaugen_all_tubes(gpio_settings, beverages, ansaug_times)
         # pouring_operations.initiate_hardware()
         return redirect('/drinks')
     elif request.method == 'GET':
