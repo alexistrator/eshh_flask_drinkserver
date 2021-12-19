@@ -378,6 +378,30 @@ app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 
 ########################################################################################################################
 #
+# Pumping
+#
+########################################################################################################################
+
+# checks if glass was placed, and handles the whole pouring process. Should be renamed.
+@app.route('/admin/pump_action/<str:gpio>', methods=['GET', 'POST'])
+def pump_action(gpio):
+    global gpio_settings, beverages, extraction_cap_ml_s
+
+    if request.method == 'GET':
+        return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
+    else:
+        if request.form['submit'] == "Start":
+            # turn gpio on
+            print('Start: ' + str(gpio))
+            pass
+        if request.form['submit'] == "Stop":
+            print('Stop: ' + str(gpio))
+            # turn gpio off
+            pass
+
+
+########################################################################################################################
+#
 # MAIN
 #
 ########################################################################################################################

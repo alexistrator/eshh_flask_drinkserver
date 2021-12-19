@@ -188,6 +188,8 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_set
 
     while time_c <= time_s:
         scale = get_scale_value(gpio_settings)
+        if scale == -0.0:
+            scale = 0.0
         print(scale)
         time_c+=1
         # approximation with +/- 20% - let's try it like this
