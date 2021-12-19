@@ -116,7 +116,7 @@ def setup_gpio():
             if value != 0: 
                 GPIO.setup(value, GPIO.OUT, initial=GPIO.LOW)
                 #GPIO.output( value, GPIO.LOW )
-    print('i did set up the gpios')
+    print('i did set up the gpios in the function')
         # if is scale
             # GPIO.setup(value, GPIO.OUT)
         # if is distance
@@ -440,7 +440,7 @@ def pump_action2(gpio):
 ########################################################################################################################
 
 if __name__== '__main__':
-    app.run(debug=False, port=5000 
+    app.run(debug=False, use_reloader=False, port=5000 
             # ,host='192.168.1.141'
             #,host='192.168.223.176'
             #,host='192.168.223.211'
