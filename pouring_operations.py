@@ -117,8 +117,8 @@ def get_scale_value(gpio_settings):
         val = hx.get_weight(gpio_settings['scale_in_DT'])
         print(val)
 
-        hx.power_down()
-        hx.power_up()
+        #hx.power_down()
+        #hx.power_up()
         time.sleep(0.01)
 
     except (KeyboardInterrupt, SystemExit):
