@@ -89,7 +89,7 @@ def setup_gpio():
     global GPIO
 
     GPIO.cleanup()
-    GPIO.setmode(GPIO.BOARD)
+    GPIO.setmode(GPIO.BCM)
 
     for key, value in gpio_settings.items():
         if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key): 
