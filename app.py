@@ -76,7 +76,7 @@ ansaug_times = {
 # TODO PRIO1 set the right GPIOS
 
 gpio_settings = {
-        "pump_1":       20,
+        "pump_1":       26,
         "pump_2":       16,
         "pump_3":       12,
         "pump_4":       0,
