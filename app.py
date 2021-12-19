@@ -384,7 +384,7 @@ app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 
 # checks if glass was placed, and handles the whole pouring process. Should be renamed.
 @app.route('/admin/pump_action', methods=['GET'])
-def pump_action(gpio):
+def pump_action1():
     global gpio_settings, beverages, extraction_cap_ml_s
 
     if request.method == 'GET':
@@ -393,7 +393,7 @@ def pump_action(gpio):
 
 # checks if glass was placed, and handles the whole pouring process. Should be renamed.
 @app.route('/admin/pump_action/<gpio>', methods=['GET', 'POST'])
-def pump_action(gpio):
+def pump_action2(gpio):
     global gpio_settings, beverages, extraction_cap_ml_s
 
     if request.method == 'GET':
