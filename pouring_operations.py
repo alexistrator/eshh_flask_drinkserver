@@ -25,8 +25,8 @@ EMULATE_HX711=False
 referenceUnit = 1
 if not EMULATE_HX711:
     # uncomment line below when running from raspi
-    # import RPi.GPIO as GPIO
-    # from hx711 import HX711
+    import RPi.GPIO as GPIO
+    from hx711 import HX711
     print('hello')
 else:
     #from emulated_hx711 import HX711
@@ -149,8 +149,7 @@ def get_scale_value():
 #
 ########################################################################################################################
 
-# check if I can condense the ansaug-functions into one function, and just give it a one-element list if i only want to do one
-# tube. Seems more simple to me. 
+
 def ansaugen_all_tubes(gpio_settings, beverages, ansaug_times):
     pins_ansaugen=[]
     #TODO Prio2 Group the ansaug times in 2D array, start with the longest, end with the shortest. Based on the ansaug-times
@@ -205,7 +204,8 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap):
     time_c += 1
 
     while time_c <= time_s:
-        scale = get_scale_value()
+        #scale = get_scale_value()
+        scale=0
         # approximation with +/- 20% - let's try it like this
         if scale <= time_c*extraction_cap*1.2 and scale >= time_c*extraction_cap*0.8:
             keep_going = True
