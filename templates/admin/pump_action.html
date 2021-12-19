@@ -7,7 +7,7 @@
 {% block body %}
     <h1> Start/Stop the pumps </h1>
 
-    {% for gpio in gpio_settings.key() %}
+    {% for gpio in gpio_settings.keys() %}
 		<h2>{{ gpio }}</h2>
 		<p> This activates pin: {{ gpio_settings[gpio]}} </p>
 		<br>    
