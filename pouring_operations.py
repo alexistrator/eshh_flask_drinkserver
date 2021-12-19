@@ -73,12 +73,8 @@ def check_glass_inserted():
 ########################################################################################################################
 def cleanAndExit():
     print("Cleaning...")
-
-    if not EMULATE_HX711:
-        GPIO.cleanup()
         
     print("Bye!")
-    sys.exit()
 
 # TODO Prio2
 # This would offer a way to calibrate the scale via the robot gui. Not necessary for now.

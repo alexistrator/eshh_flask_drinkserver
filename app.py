@@ -6,7 +6,7 @@ import pouring_operations
 import multiprocessing as mp
 
 # UNCOMMENT IF RUNNING FROM RASPI:
-from RPi import GPIO
+import RPi.GPIO as GPIO
 
 ########################################################################################################################
 #
@@ -96,7 +96,6 @@ for key, value in gpio_settings.items():
 print('i did set up the gpios')
 
 def setup_gpio():
-    global GPIO
 
     GPIO.cleanup()
     GPIO.setmode(GPIO.BCM)
@@ -400,7 +399,7 @@ app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 # checks if glass was placed, and handles the whole pouring process. Should be renamed.
 @app.route('/admin/pump_action', methods=['GET'])
 def pump_action1():
-    global gpio_settings, beverages, extraction_cap_ml_s, GPIO
+    global gpio_settings, beverages, extraction_cap_ml_s
 
     if request.method == 'GET':
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
