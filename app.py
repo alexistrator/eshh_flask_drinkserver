@@ -323,6 +323,7 @@ def check_glass_placement():
                 # it probably doesn't make much sense to keep track of this here, if i am controlling the pouring process in
                 # another function alltogether:
                 LIQUID_RAN_OUT = False
+                pouring_operations.tare_scale()
                 try:
                     pouring_operations.control_pouring_process(session,gpio_settings, beverages, extraction_cap_ml_s)
                                                                 

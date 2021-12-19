@@ -225,7 +225,6 @@ def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml
     # now, the pouring process just does its job, which i need to configure here.
     drink_id = session['wants_drink_id']
     recipes = db_operations.get_recipe_for_drink(drink_id)
-    tare_scale()
 
 
     for recipe in recipes:
