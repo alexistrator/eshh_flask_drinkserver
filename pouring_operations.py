@@ -5,7 +5,6 @@ import db_operations
 
 #from db_operations import get_all_liquids_db, get_liduid_by_id, get_recipe_for_drink
 
-hx
 
 ########################################################################################################################
 #
@@ -16,21 +15,24 @@ hx
 # TODO Prio1
 # this function will set the gpio pins and handle whatever the hardware needs to go through in order to be ready
 def initiate_hardware():
-    # scale - configure the scale environment
-    # TODO PRIO2 check if this works on the raspberry pi
-    # TODO PRIO2 add the files needed to make the scale work to my git, referencing to the guy who posted them
-    EMULATE_HX711=False
-    if not EMULATE_HX711:
-        # uncomment line below when running from raspi
-        from hx711 import HX711
-        print('hello from hx711')
-    else:
-        print('sounds nice doesnt work')
-    hx = HX711(5, 6)
-    hx.set_reading_format("MSB", "MSB")
-    hx.set_reference_unit(491)
+    return True
 
+
+# scale - configure the scale environment
+# TODO PRIO2 check if this works on the raspberry pi
+# TODO PRIO2 add the files needed to make the scale work to my git, referencing to the guy who posted them
+EMULATE_HX711=False
+if not EMULATE_HX711:
+    # uncomment line below when running from raspi
+    from hx711 import HX711
+    print('hello form hx711')
+else:
+    print('sounds nice doesnt work')
+hx = HX711(5, 6)
+hx.set_reading_format("MSB", "MSB")
+hx.set_reference_unit(491)
     
+
 # distance sensor - configure the distance sensor environment
 standard_value = 0
 
