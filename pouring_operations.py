@@ -108,9 +108,8 @@ def tare_scale():
 # TODO Prio 1
 # This will return the current scale value
 def get_scale_value(gpio_settings):
-    # 1 - start up scale
-    # 2 - read in current value
-    # 3 - return that value
+    
+    
     scale_value = 0
 
     try:
