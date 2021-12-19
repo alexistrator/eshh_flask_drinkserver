@@ -401,11 +401,11 @@ def pump_action2(gpio):
     else:
         print('hello')
         print(request.form)
-        if request.form['submit'] == "Start":
+        if request.form['button'] == "Start":
             # turn gpio on
             print('Start: ' + str(gpio))
             pass
-        if request.form['submit'] == "Stop":
+        if request.form['button'] == "Stop":
             print('Stop: ' + str(gpio))
             # turn gpio off
             pass
