@@ -114,7 +114,7 @@ def get_scale_value(gpio_settings):
     scale_value = 0
 
     try:
-        val = hx.get_weight(gpio_settings['scale_in_DT'])
+        val = hx.get_weight(gpio_settings['scale_in_DT'], 1)
         print(val)
 
         #hx.power_down()
