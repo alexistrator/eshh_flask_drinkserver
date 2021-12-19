@@ -119,11 +119,11 @@ def get_scale_value(gpio_settings):
 
         hx.power_down()
         hx.power_up()
-        time.sleep(0.1)
+        time.sleep(0.01)
 
     except (KeyboardInterrupt, SystemExit):
         cleanAndExit()
-    return scale_value
+    return round(scale_value, 0)
 
 
 ########################################################################################################################
