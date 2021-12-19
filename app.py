@@ -92,13 +92,14 @@ def setup_gpio():
     for key, value in gpio_settings.items():
         if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key):  
             GPIO.setup(value, GPIO.OUT)
+    print('i did set up the gpios')
         # if is scale
             # GPIO.setup(value, GPIO.OUT)
         # if is distance
         
         # etc.
 
-
+setup_gpio()
 ########################################################################################################################
 #
 # SET UP APP
