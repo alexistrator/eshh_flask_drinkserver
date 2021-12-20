@@ -106,24 +106,19 @@ for key, value in gpio_settings.items():
             #GPIO.output( value, GPIO.LOW )
 print('i did set up the gpios')
 
-def setup_gpio():
-
-    GPIO.cleanup()
-    GPIO.setmode(GPIO.BCM)
-
-    for key, value in gpio_settings.items():
-        if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key): 
-            if value != 0: 
-                GPIO.setup(value, GPIO.OUT, initial=GPIO.LOW)
-                #GPIO.output( value, GPIO.LOW )
-    print('i did set up the gpios in the function')
-        # if is scale
-            # GPIO.setup(value, GPIO.OUT)
-        # if is distance
-        
-        # etc.
-
-#setup_gpio()
+# scale - configure the scale environment
+# TODO PRIO2 check if this works on the raspberry pi
+# TODO PRIO2 add the files needed to make the scale work to my git, referencing to the guy who posted them
+EMULATE_HX711=False
+if not EMULATE_HX711:
+    # uncomment line below when running from raspi
+    from hx711 import HX711
+    print('hello form hx711')
+else:
+    print('sounds nice doesnt work')
+hx = HX711(5, 6)
+hx.set_reading_format("MSB", "MSB")
+hx.set_reference_unit(491)
 
 
 

@@ -3,7 +3,6 @@ import sys
 from math import isclose
 import db_operations
 
-#from db_operations import get_all_liquids_db, get_liduid_by_id, get_recipe_for_drink
 
 
 ########################################################################################################################
@@ -12,26 +11,7 @@ import db_operations
 #
 ########################################################################################################################
 
-# TODO Prio1
-# this function will set the gpio pins and handle whatever the hardware needs to go through in order to be ready
-def initiate_hardware():
-    return True
-
-
-# scale - configure the scale environment
-# TODO PRIO2 check if this works on the raspberry pi
-# TODO PRIO2 add the files needed to make the scale work to my git, referencing to the guy who posted them
-EMULATE_HX711=False
-if not EMULATE_HX711:
-    # uncomment line below when running from raspi
-    from hx711 import HX711
-    print('hello form hx711')
-else:
-    print('sounds nice doesnt work')
-hx = HX711(5, 6)
-hx.set_reading_format("MSB", "MSB")
-hx.set_reference_unit(491)
-    
+# moved everything to app.py
 
 # distance sensor - configure the distance sensor environment
 standard_value = 0
@@ -107,7 +87,7 @@ def tare_scale():
 
 # TODO Prio 1
 # This will return the current scale value
-def get_scale_value(gpio_settings):
+def get_scale_value(gpio_settings, hx):
     
     
     scale_value = 0
@@ -165,7 +145,7 @@ def ansaugen_single_tube(gpio_to_ansaug):
 #
 ########################################################################################################################
 
-def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings):
+def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings, hx):
 
     time_s = round(amount_ml/extraction_cap, 0)
     time_s = 20
@@ -186,7 +166,7 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_set
     time_c += 1
 
     while time_c <= time_s:
-        scale = get_scale_value(gpio_settings)
+        scale = get_scale_value(gpio_settings, hx)
         if scale == -0.0:
             scale = 0.0
         print(scale)
@@ -215,7 +195,7 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_set
 
 
 
-def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml_s):
+def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml_s, hx):
     # at this point, selection was confirmed and glass has been inserted 
     # now, the pouring process just does its job, which i need to configure here.
     drink_id = session['wants_drink_id']
