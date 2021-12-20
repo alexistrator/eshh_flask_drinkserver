@@ -147,10 +147,6 @@ def ansaugen_single_tube(gpio_to_ansaug):
 
 def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings, hx):
 
-    time_s = round(amount_ml/extraction_cap, 0)
-    time_s = 20
-    print(time_s)
-    time_c = 0 
     keep_going = True
     current_state={
         'poured_time':0,
@@ -163,33 +159,14 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_set
     print('going to sleep...')
     time.sleep(1)
     print('woke up')
-    time_c += 1
+    scale = 0
 
-    while time_c <= time_s:
+    while scale <= amount_ml:
         scale = get_scale_value(gpio_settings, hx)
         if scale == -0.0:
             scale = 0.0
         print(scale)
-        time_c+=1
-        # approximation with +/- 20% - let's try it like this
-        """ if scale <= time_c*extraction_cap*1.2 and scale >= time_c*extraction_cap*0.8:
-            keep_going = True
-            # time.sleep(1)
-            time_c += 1
-            current_state['poured_time'] = time_c
-            pass
-        else:
-            # interrupt pouring proces according to follwing scenarios:
-            if scale > time_c*extraction_cap*1.2:
-                print('seems like we re poruing too fast - stopping the process')
-                #TODO PRIO1 - Handle this
-                break
-            if scale < time_c*extraction_cap*0.8:
-                print('seems like pouring is obstructed or the bottle is empty - please refill and confirm')
-                #TODO PRIO1 - Handle this
-
-                break
-            break """
+        print('pouring from: ' + str(outlet))
         
 
 
