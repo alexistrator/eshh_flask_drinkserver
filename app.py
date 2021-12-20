@@ -316,7 +316,7 @@ def start_pouring_process(id):
 # checks if glass was placed, and handles the whole pouring process. Should be renamed.
 @app.route('/serving/initiate/check_glass', methods=['GET', 'POST'])
 def check_glass_placement():
-    global INSERTED, gpio_settings, beverages, extraction_cap_ml_s, hx
+    global INSERTED, gpio_settings, beverages, extraction_cap_ml_s, hx, READY
 
     id = session['wants_drink_id']
     recipe = db_operations.get_recipe_for_drink(id)
