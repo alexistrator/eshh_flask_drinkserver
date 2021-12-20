@@ -351,6 +351,7 @@ def check_glass_placement():
                     # TODO handle successful completion of the pouring process
                     # if finishes successfully, needs to go load the next page or whatever, maybe just show a third div that was
                     # hidden until now.
+                    READY = False
                     return redirect('/')
                 except Exception as e:
                     print(e)
