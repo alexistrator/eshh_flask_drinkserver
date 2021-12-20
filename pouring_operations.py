@@ -206,14 +206,16 @@ def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml
 
 
     for recipe in recipes:
-        liquid_id = recipe.id_liquid
-        liquid_name = db_operations.get_liduid_by_id(liquid_id)
-        amount_ml = recipe.ml_liquid
-        outlet = next(key for key, value in beverages.items() if value == liquid_name)
-        extraction_cap = extraction_cap_ml_s[outlet]
-        gpio_pin = gpio_settings[outlet]
-        print('about to pour first liquid...')
-        pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings )
+        try:
+            liquid_id = recipe.id_liquid
+            liquid_name = db_operations.get_liduid_by_id(liquid_id)
+            amount_ml = recipe.ml_liquid
+            outlet = next(key for key, value in beverages.items() if value == liquid_name)
+            extraction_cap = extraction_cap_ml_s[outlet]
+            gpio_pin = gpio_settings[outlet]
+            pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings )
+        except Exception as e: 
+            print(e)
 
 
     return True
