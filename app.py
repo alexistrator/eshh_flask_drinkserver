@@ -77,11 +77,11 @@ ansaug_times = {
 
 gpio_settings = {
         "pump_1":       26,
-        "pump_2":       16,
-        "pump_3":       12,
-        "pump_4":       0,
-        "pump_5":       0,
-        "valve":        21,
+        "pump_2":       26,
+        "pump_3":       26,
+        "pump_4":       26,
+        "pump_5":       26,
+        "valve":        26,
         "scale_out":    0,
         "scale_in_DT":  5,
         "scale_in_SCK": 6,
@@ -391,11 +391,10 @@ app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 
 ########################################################################################################################
 #
-# Pumping
+# PUMP TESTING
 #
 ########################################################################################################################
 
-# checks if glass was placed, and handles the whole pouring process. Should be renamed.
 @app.route('/admin/pump_action', methods=['GET'])
 def pump_action1():
     global gpio_settings, beverages, extraction_cap_ml_s
@@ -404,7 +403,6 @@ def pump_action1():
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
 
 
-# checks if glass was placed, and handles the whole pouring process. Should be renamed.
 @app.route('/admin/pump_action/<gpio>', methods=['GET', 'POST'])
 def pump_action2(gpio):
     global gpio_settings, beverages, extraction_cap_ml_s
