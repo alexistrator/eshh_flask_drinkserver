@@ -336,10 +336,13 @@ def check_glass_placement():
                 # it probably doesn't make much sense to keep track of this here, if i am controlling the pouring process in
                 # another function alltogether:
                 LIQUID_RAN_OUT = False
+                render_template('/serving/pouring_process.html')
                 pouring_operations.tare_scale()
                 try:
                     pouring_operations.control_pouring_process(session,gpio_settings, beverages, extraction_cap_ml_s, hx)
-                                                                
+
+
+
                     # TODO PRIO2 Ajax and JS to handle pouring process
                     # I need to update the page instead to redirecting to a new one. Is there a way to do that?
                     # Apparently, I need to use ajax for this, and need to have two divs, where i show one and hide the other, and
@@ -348,6 +351,7 @@ def check_glass_placement():
                     # TODO handle successful completion of the pouring process
                     # if finishes successfully, needs to go load the next page or whatever, maybe just show a third div that was
                     # hidden until now.
+                    return redirect('/')
                 except Exception as e:
                     print(e)
                     # if it fails, the user needs to be notified about the failed status.

@@ -199,7 +199,7 @@ def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml
         except Exception as e: 
             print(e)
 
-
+    print('terminated pouring process')
     return True
 
 
