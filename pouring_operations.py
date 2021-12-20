@@ -169,7 +169,6 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_set
         print(scale)
     GPIO.output( gpio_settings[outlet], GPIO.LOW )
 
-    print('finished pouring liquid id: ' + str(liquid_id))
     time.sleep(4)
         
 
@@ -194,7 +193,9 @@ def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml
             outlet = next(key for key, value in beverages.items() if value == liquid_name)
             extraction_cap = extraction_cap_ml_s[outlet]
             gpio_pin = gpio_settings[outlet]
+            print('pouring: ' + liquid_name)
             pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings , hx)
+            print('finished pouring: ' + liquid_name)
         except Exception as e: 
             print(e)
 
