@@ -147,7 +147,7 @@ def ansaugen_single_tube(gpio_to_ansaug):
 #
 ########################################################################################################################
 
-def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings, hx):
+def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings, hx, liquid_name):
 
     keep_going = True
     current_state={
@@ -169,7 +169,7 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_set
         print(scale)
         time.sleep(0.3)
     GPIO.output( gpio_settings[outlet], GPIO.LOW )
-
+    print('finished pouring: ' + liquid_name)
     time.sleep(4)
         
 
@@ -195,8 +195,7 @@ def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml
             extraction_cap = extraction_cap_ml_s[outlet]
             gpio_pin = gpio_settings[outlet]
             print('pouring: ' + liquid_name)
-            pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings , hx)
-            print('finished pouring: ' + liquid_name)
+            pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings , hx, liquid_name)
         except Exception as e: 
             print(e)
 
