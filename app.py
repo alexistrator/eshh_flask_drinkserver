@@ -316,7 +316,7 @@ def start_pouring_process(id):
 # checks if glass was placed, and handles the whole pouring process. Should be renamed.
 @app.route('/serving/initiate/check_glass', methods=['GET', 'POST'])
 def check_glass_placement():
-    global INSERTED, gpio_settings, beverages, extraction_cap_ml_s
+    global INSERTED, gpio_settings, beverages, extraction_cap_ml_s, hx
 
     id = session['wants_drink_id']
     recipe = db_operations.get_recipe_for_drink(id)
@@ -338,7 +338,7 @@ def check_glass_placement():
                 LIQUID_RAN_OUT = False
                 pouring_operations.tare_scale()
                 try:
-                    pouring_operations.control_pouring_process(session,gpio_settings, beverages, extraction_cap_ml_s)
+                    pouring_operations.control_pouring_process(session,gpio_settings, beverages, extraction_cap_ml_s, hx)
                                                                 
                     # TODO PRIO2 Ajax and JS to handle pouring process
                     # I need to update the page instead to redirecting to a new one. Is there a way to do that?
