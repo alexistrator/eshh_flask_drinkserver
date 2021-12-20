@@ -167,7 +167,6 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_set
         if scale == -0.0:
             scale = 0.0
         print(scale)
-        print('pouring from: ' + str(outlet))
     GPIO.output( gpio_settings[outlet], GPIO.LOW )
 
     print('finished pouring liquid id: ' + str(liquid_id))

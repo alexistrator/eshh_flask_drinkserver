@@ -28,6 +28,7 @@ READY = False
 ERROR = False
 BASE_VALUE = 0
 INSERTED = False
+CONTINUED = False
 
 ########################################################################################################################
 #
@@ -103,7 +104,6 @@ for key, value in gpio_settings.items():
     if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key): 
         if value != 0: 
             GPIO.setup(value, GPIO.OUT, initial=GPIO.LOW)
-            #GPIO.output( value, GPIO.LOW )
 print('i did set up the gpios')
 
 # scale - configure the scale environment
@@ -316,11 +316,12 @@ def start_pouring_process(id):
 # checks if glass was placed, and handles the whole pouring process. Should be renamed.
 @app.route('/serving/initiate/check_glass', methods=['GET', 'POST'])
 def check_glass_placement():
-    global INSERTED, gpio_settings, beverages, extraction_cap_ml_s, hx, READY
+    global INSERTED, gpio_settings, beverages, extraction_cap_ml_s, hx, READY, CONTINUED
 
     id = session['wants_drink_id']
     recipe = db_operations.get_recipe_for_drink(id)
     liquids = 0 #get_all_liquids()
+    
 
     if request.method == 'GET':
         if not INSERTED:
@@ -340,8 +341,6 @@ def check_glass_placement():
                 pouring_operations.tare_scale()
                 try:
                     pouring_operations.control_pouring_process(session,gpio_settings, beverages, extraction_cap_ml_s, hx)
-
-
 
                     # TODO PRIO2 Ajax and JS to handle pouring process
                     # I need to update the page instead to redirecting to a new one. Is there a way to do that?
