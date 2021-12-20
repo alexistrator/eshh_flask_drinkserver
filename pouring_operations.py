@@ -2,6 +2,8 @@ import time
 import sys
 from math import isclose
 import db_operations
+import RPi.GPIO as GPIO
+
 
 
 
