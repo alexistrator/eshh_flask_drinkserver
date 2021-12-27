@@ -1,13 +1,20 @@
-from flask import Flask, render_template, request, redirect, session
-from flask_sqlalchemy import SQLAlchemy
 import re
 import db_operations
-import pouring_operations
 import multiprocessing as mp
 import time
+from flask import Flask, render_template, request, redirect, session
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
+from sqlalchemy.orm.relationships import RelationshipProperty
 
-# UNCOMMENT IF RUNNING FROM RASPI:
-import RPi.GPIO as GPIO
+RASPI = False
+SCALE = False
+HOST = "127.0.0.1"
+
+if RASPI:
+    import RPi.GPIO as GPIO
+    import pouring_operations
+    from hx711 import HX711
 
 ########################################################################################################################
 #
@@ -66,16 +73,11 @@ ansaug_times = {
         "valve":    10
 }
 
-
 ########################################################################################################################
 #
 # GPIO CONFIGURATION
 #
 ########################################################################################################################
-
-# GPIO-Settings:
-# TODO PRIO1 set the right GPIOS
-
 gpio_settings = {
         "pump_1":       26,
         "pump_2":       26,
@@ -95,30 +97,25 @@ gpio_settings = {
         }
 
 # Setup and stuff:
+if RASPI:
+    GPIO.cleanup()
+    time.sleep(1)
+    GPIO.setmode(GPIO.BCM)
 
-GPIO.cleanup()
-time.sleep(1)
-GPIO.setmode(GPIO.BCM)
+    for key, value in gpio_settings.items():
+        if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key): 
+            if value != 0: 
+                GPIO.setup(value, GPIO.OUT, initial=GPIO.LOW)
+    print('i did set up the gpios')
 
-for key, value in gpio_settings.items():
-    if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key): 
-        if value != 0: 
-            GPIO.setup(value, GPIO.OUT, initial=GPIO.LOW)
-print('i did set up the gpios')
-
-# scale - configure the scale environment
-# TODO PRIO2 check if this works on the raspberry pi
-# TODO PRIO2 add the files needed to make the scale work to my git, referencing to the guy who posted them
-EMULATE_HX711=False
-if not EMULATE_HX711:
-    # uncomment line below when running from raspi
-    from hx711 import HX711
-    print('hello form hx711')
-else:
-    print('sounds nice doesnt work')
-hx = HX711(5, 6)
-hx.set_reading_format("MSB", "MSB")
-hx.set_reference_unit(491)
+    if SCALE: 
+        # scale - configure the scale environment
+        # TODO PRIO2 check if this works on the raspberry pi
+        # TODO PRIO2 add the files needed to make the scale work to my git, referencing to the guy who posted them
+        hx = HX711(5, 6)
+        hx.set_reading_format("MSB", "MSB")
+        hx.set_reference_unit(491)
+        print("I did set up the scale")
 
 
 
@@ -138,7 +135,7 @@ class Drink(db.Model):
     title = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text, nullable=False)
 
-    def __repr__(self): # displays something to the screen after creating a blogpost
+    def __repr__(self):
         return 'Drink ' + str(self.id)
 
 class Liquid(db.Model):
@@ -166,12 +163,18 @@ class Recipe(db.Model):
 # important function - handles the robots boot process
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """
+    Important function. Handles boot process, with ansaugen.
+
+    Returns:
+        redirect : if READY and GET, go to the drinks menue
+        template : if not READY and GET, return html template to configure robot
+    """
     global READY, beverages, gpio_settings
 
     if READY and request.method == 'GET':
         # ansaugen all the set beverages
         # pouring_operations.ansaugen_all_tubes(gpio_settings, beverages, ansaug_times)
-        # pouring_operations.initiate_hardware()
         return redirect('/drinks')
     elif request.method == 'GET':
         return render_template('/admin/conf_robot.html', options=db_operations.get_all_liquids_db())
@@ -187,24 +190,35 @@ def robot_conf():
     if request.method == 'GET':
         return render_template('/admin/conf_robot_edit.html', options=db_operations.get_all_liquids_db(), beverages=beverages)
     else:
-        # can't remember what my logic was when writing this:
+        # READY set to false so the ansaugen can be done for the tube
         READY = False
         return redirect('/')
 
 # --- DRINKS ---
 
-# displays the available drinks
+    
 @app.route('/drinks')
 def drinks():
+    """
+    Shows all available drinks
+
+    Returns:
+        template: html-template with the available drinks
+    """
     all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
     doable_drinks = db_operations.get_drinks_doable(beverages, all_recipes, all_liquids)
     return render_template('drinks.html'
                             ,drinks=doable_drinks 
                             ,recipes=all_recipes)
 
-# displays the admin view on available drinks, including the ability to add new drinks to the database
 @app.route('/admin/add_drink', methods=['GET', 'POST'])
 def add_drink():
+    """
+    Is accessible from admin mode. Makes it possible to add new drink recipes to the database, and to delete or edit them.
+
+    Returns:
+        template: html template
+    """
     all_drinks, all_recipes, all_liquids = db_operations.get_data_for_drinks()
     if request.method == 'POST':
         drink_title = request.form['title']
@@ -229,10 +243,18 @@ def add_drink():
         return render_template('/admin/add_drink.html', options=db_operations.get_all_liquids_db(),
                     drinks=all_drinks, recipes=all_recipes)
 
-# handles the deletion of a drink (drink row + recipe rows!)
 # TODO PRIO2 Fix problems so i can do this with db_operations
 @app.route('/admin/drinks/delete/<int:id>')
 def delete(id):
+    """
+    Deletes everything related to a certain drink ID (drink + recipe)
+
+    Args:
+        id (int): id of the drinks that needs to be deleted
+
+    Returns:
+        redirect: back to the drink admin site
+    """
     recipe = Recipe.query.filter_by(id_drink=id).all()    
     drink = Drink.query.get_or_404(id)
     for rec in recipe:
@@ -244,23 +266,35 @@ def delete(id):
 # allows to edit an existing drink
 @app.route('/admin/drinks/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
+    """
+    Allows to edit a drink element as well as its corresponding recipes.
+
+    Args:
+        id (int): id of the drink that has to be edited
+
+    Returns:
+        template: html-template to drink editing menu if GET
+        redirect: redirect to drink admin menu if POST
+    """
     drink = Drink.query.get_or_404(id)
     recipe = Recipe.query.filter_by(id_drink=drink.id).all()
     all_liquids = Liquid.query.all()
-    if request.method == 'POST':
+    if request.method == 'GET':
+        return render_template('/admin/edit_drink.html', drink=drink, recipe=recipe, all_liquids=all_liquids, options=db_operations.get_all_liquids_db())
+    # TODO Prio2 outsource the code below to db_operations
+    else:
+        # edit the drink element
         drink.title = request.form['title']
         drink.description = request.form['description']
         db.session.commit()
-        keys = list(request.form.keys())
-        # delete the current recipes available
+        # delete the current recipes available for the drink
         for rec in recipe:
             db.session.delete(rec)
         db.session.commit()
         # generate new recipe for the drink
+        keys = list(request.form.keys())
         db_operations.add_recipe_to_db(db, keys, request, drink.id)
         return redirect('/admin/add_drink')
-    else:
-        return render_template('/admin/edit_drink.html', drink=drink, recipe=recipe, all_liquids=all_liquids, options=db_operations.get_all_liquids_db())
 
 # --- LIQUIDS ---
 # admin-liquid site. Allows to add new liquids, and displays all already existing liquids.
@@ -318,11 +352,6 @@ def start_pouring_process(id):
 def check_glass_placement():
     global INSERTED, gpio_settings, beverages, extraction_cap_ml_s, hx, READY, CONTINUED
 
-    id = session['wants_drink_id']
-    recipe = db_operations.get_recipe_for_drink(id)
-    liquids = 0 #get_all_liquids()
-    
-
     if request.method == 'GET':
         if not INSERTED:
             return render_template('/serving/glass_check.html')
@@ -331,36 +360,39 @@ def check_glass_placement():
     else:
         if request.form['continue_button'] == 'Continue':
             print('checking distance sensor...')
-            INSERTED = pouring_operations.check_glass_inserted()
+            if RASPI:
+                INSERTED = pouring_operations.check_glass_inserted()
+            else:
+                INSERTED = True
 
-            if INSERTED:
-                # it probably doesn't make much sense to keep track of this here, if i am controlling the pouring process in
-                # another function alltogether:
-                LIQUID_RAN_OUT = False
-                render_template('/serving/pouring_process.html')
-                pouring_operations.tare_scale()
-                try:
-                    pouring_operations.control_pouring_process(session,gpio_settings, beverages, extraction_cap_ml_s, hx)
+            if INSERTED:                
+                if RASPI:
+                    try:
+                        pouring_operations.tare_scale()
+                        pouring_operations.control_pouring_process(session,gpio_settings, beverages, extraction_cap_ml_s, hx)
 
-                    # TODO PRIO2 Ajax and JS to handle pouring process
-                    # I need to update the page instead to redirecting to a new one. Is there a way to do that?
-                    # Apparently, I need to use ajax for this, and need to have two divs, where i show one and hide the other, and
-                    # vice versa. Keep on googling.
-                    
-                    # TODO handle successful completion of the pouring process
-                    # if finishes successfully, needs to go load the next page or whatever, maybe just show a third div that was
-                    # hidden until now.
-                    INSERTED = False
+                        # TODO PRIO2 Ajax and JS to handle pouring process
+                        # I need to update the page instead to redirecting to a new one. Is there a way to do that?
+                        # Apparently, I need to use ajax for this, and need to have two divs, where i show one and hide the other, and
+                        # vice versa. Keep on googling.
+                        
+                        # TODO handle successful completion of the pouring process
+                        # if finishes successfully, needs to go load the next page or whatever, maybe just show a third div that was
+                        # hidden until now.
+                        INSERTED = False
+                        return redirect('/')
+                    except Exception as e:
+                        print(e)
+                        # if it fails, the user needs to be notified about the failed status.
+                        # it should change into debug mode, where the user is asked a series of questions. If all of those fail, 
+                        # the robot should stay in hibernation until restarted. 
+
+                        # TODO implement a working redirection to a working debugging system 
+
+                        return redirect('debugging process')
+                else:
+                    # mock serving (say "pouring liquid XYZ, pouring next, ..." etc.)
                     return redirect('/')
-                except Exception as e:
-                    print(e)
-                    # if it fails, the user needs to be notified about the failed status.
-                    # it should change into debug mode, where the user is asked a series of questions. If all of those fail, 
-                    # the robot should stay in hibernation until restarted. 
-
-                    # TODO implement a working redirection to a working debugging system 
-
-                    return redirect('debugging process')
             else:
                 print('insert the fucking glass you donkey')
             
@@ -372,8 +404,6 @@ def check_glass_placement():
 # FUNCTIONS JINJA
 #
 ########################################################################################################################
-
-# everythin here works so far. Just leave it alone until there are no other bugs to solve. 
 
 # available form html files. feeds jinja data
 def get_recipes_for_drink(id_drink_req:int, all_recipes):
@@ -401,30 +431,41 @@ app.jinja_env.globals.update(get_liquid_by_id=get_liquid_by_id)
 
 @app.route('/admin/pump_action', methods=['GET'])
 def pump_action1():
-    global gpio_settings, beverages, extraction_cap_ml_s
+    """
+    Opens a menu to test the function of all the pumps. They can be turned on and off without having to go through the 
+    drinks selection.
 
+    Returns:
+        template : html-template with the option to turn on and off certain gpio pins
+    """
+    global gpio_settings, beverages, extraction_cap_ml_s
     if request.method == 'GET':
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
 
 
 @app.route('/admin/pump_action/<gpio>', methods=['GET', 'POST'])
 def pump_action2(gpio):
+    """
+    Handles the POSTs from the pump testing site. Turns GPIOs on and off. 
+
+    Args:
+        gpio (int): GPIO pin that is being activated/deactivated
+
+    Returns:
+        template: html-template where the different pumps can be tested
+    """
     global gpio_settings, beverages, extraction_cap_ml_s
 
     if request.method == 'GET':
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
     else:
-        print('hello, THIS IS PUMP ACTION')
-        print(request.form)
         if request.form['button'] == "Start":
-            # turn gpio on
             print('Start: ' + str(gpio))
             GPIO.output( gpio_settings[str(gpio)], GPIO.HIGH )
             pass
         if request.form['button'] == "Stop":
             print('Stop: ' + str(gpio))
             GPIO.output( gpio_settings[str(gpio)], GPIO.LOW )
-            # turn gpio off
             pass
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
             
@@ -437,11 +478,7 @@ def pump_action2(gpio):
 ########################################################################################################################
 
 if __name__== '__main__':
-    app.run(debug=True, port=5000 
-            # ,host='192.168.1.141'
-            #,host='192.168.223.176'
-            #,host='192.168.223.211'
-            ,host='192.168.68.176'
+    app.run(debug=True, port=5000, host=HOST
             )
 
 

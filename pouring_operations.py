@@ -68,10 +68,7 @@ def check_glass_inserted():
 ########################################################################################################################
 def cleanAndExit():
     print("Cleaning...")
-
-    if not EMULATE_HX711:
-        GPIO.cleanup()
-        
+    GPIO.cleanup()   
     print("Bye!")
     sys.exit()
 
