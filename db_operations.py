@@ -126,8 +126,6 @@ def delete_drink_from_db(db, id):
     recipe = Recipe.query.filter_by(id_drink=id).all()    
     drink = Drink.query.get_or_404(id)
     for rec in recipe:
-        print('deleting:')
-        print(rec.id_liquid)
         db.session.delete(rec)
     db.session.delete(drink)
     db.session.commit()
@@ -144,9 +142,7 @@ def edit_drink_from_db(db, request, drink):
 #
 ########################################################################################################################
 
-# gets all the recipe rows that match a drinks id
 def get_recipe_for_drink(id:int):
-    # write a function that gets the recipe for a given drink id
     recipe = Recipe.query.filter_by(id_drink=id).all()
     return recipe
 
@@ -167,7 +163,6 @@ def set_current_tube_conf(request, beverages):
             beverages[keys[i]] = selection[keys[i]]
         if re.match('^valve', keys[i]):
             beverages[keys[i]] = selection[keys[i]]
-            # when all is done, change READY to True, or keep it false, if the input is not correct
     return beverages
 
 

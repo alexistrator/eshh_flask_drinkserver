@@ -3,8 +3,7 @@ import sys
 from math import isclose
 import db_operations
 import RPi.GPIO as GPIO
-
-
+from hx711 import HX711
 
 
 ########################################################################################################################
@@ -13,12 +12,9 @@ import RPi.GPIO as GPIO
 #
 ########################################################################################################################
 
-# moved everything to app.py
-
-# distance sensor - configure the distance sensor environment
-standard_value = 0
-
-
+# set the usual value read from the distance sensor. If the distance is significantly different, we can assume that a glass
+# has been inserted.
+standard_value_distance_sens = 0
 
 ########################################################################################################################
 #
@@ -56,7 +52,7 @@ def get_distance_sensor_val():
 def check_glass_inserted():
     global standard_value
     current_value = get_distance_sensor_val()
-    if isclose(current_value, standard_value, abs_tol=10):
+    if isclose(current_value, standard_value_distance_sens, abs_tol=10):
         return False
     else:
         return True
@@ -77,31 +73,16 @@ def cleanAndExit():
 def calibrate(): 
     return True
 
-# TODO Prio1
-# This tares the scale value. Not sure if we even need it, I can just set it back to zero in the pouring loop as soon as the 
-# glass was placed
-def tare_scale():
-    return True
-
-
-# TODO Prio 1
-# This will return the current scale value
 def get_scale_value(gpio_settings, hx):
-    
-    
     scale_value = 0
-
     try:
         scale_value = hx.get_weight()
-
         #hx.power_down()
         #hx.power_up()
         time.sleep(0.01)
-
     except (KeyboardInterrupt, SystemExit):
         cleanAndExit()
     return round(scale_value, 0)
-
 
 ########################################################################################################################
 #
@@ -109,8 +90,9 @@ def get_scale_value(gpio_settings, hx):
 #
 ########################################################################################################################
 
-
-def ansaugen_all_tubes(gpio_settings, beverages, ansaug_times):
+# TODO Prio1 - Get a working version of this method. It shall be executed upon the start of the great awakening of the drink
+# robot.
+def ansaugen_all_tubes(gpio_settings:dict, beverages:dict, ansaug_times:dict):
     pins_ansaugen=[]
     #TODO Prio2 Group the ansaug times in 2D array, start with the longest, end with the shortest. Based on the ansaug-times
     ansaug_time = 5
@@ -120,23 +102,16 @@ def ansaugen_all_tubes(gpio_settings, beverages, ansaug_times):
     
     for pin in pins_ansaugen:
         # turn on pump
-        print(pin)
-    print('turned on pump')
+        next
+    print('turned on pump(s)')
 
     time.sleep(ansaug_time)
 
     for pin in pins_ansaugen:
         # turn off pump
-        print(pin)
-    print('ansaugen should be finished')
+        next
+    print('turned off pumps')
     return True
-
-def ansaugen_single_tube(gpio_to_ansaug):
-    # can be used to ansaugen  a single tube, when a single bottle was changed, and we don't want to waste alcohol or drink 
-    # disgusting mixes
-
-    return True
-
 
 ########################################################################################################################
 #
@@ -144,7 +119,8 @@ def ansaugen_single_tube(gpio_to_ansaug):
 #
 ########################################################################################################################
 
-def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings, hx, liquid_name):
+def pour_liquid(liquid_id:int, outlet, amount_ml:int, gpio_pin:int, 
+                extraction_cap:int, gpio_settings:dict, hx:HX711, liquid_name:str):
 
     keep_going = True
     current_state={
@@ -173,7 +149,7 @@ def pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_set
 
 
 
-def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml_s, hx):
+def control_pouring_process(session:dict, gpio_settings:dict, beverages:dict, extraction_cap_ml_s:dict, hx:HX711):
     # at this point, selection was confirmed and glass has been inserted 
     # now, the pouring process just does its job, which i need to configure here.
     drink_id = session['wants_drink_id']
@@ -181,7 +157,6 @@ def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml
     hx.reset()
     hx.tare()
     print("Tare done! Add weight now...")
-
 
     for recipe in recipes:
         try:
@@ -193,6 +168,7 @@ def control_pouring_process(session, gpio_settings, beverages, extraction_cap_ml
             gpio_pin = gpio_settings[outlet]
             print('pouring: ' + liquid_name)
             pour_liquid(liquid_id, outlet, amount_ml, gpio_pin, extraction_cap, gpio_settings , hx, liquid_name)
+            hx.tare() # important
         except Exception as e: 
             print(e)
 
