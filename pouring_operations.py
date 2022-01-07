@@ -17,6 +17,17 @@ from hx711 import HX711
 # has been inserted.
 standard_value_distance_sens = 16.5
 
+
+#GPIO Mode (BOARD / BCM)
+GPIO.setmode(GPIO.BCM)
+ 
+#set GPIO Pins
+GPIO_TRIGGER = 25
+GPIO_ECHO = 26
+ 
+#set GPIO direction (IN / OUT)
+GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
+GPIO.setup(GPIO_ECHO, GPIO.IN)
 ########################################################################################################################
 #
 # RGB Controls
