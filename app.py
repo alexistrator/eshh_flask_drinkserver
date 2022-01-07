@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.relationships import RelationshipProperty
 
-RASPI = False
+RASPI = True
 SCALE = False
 HOST = "127.0.0.1"
 
@@ -134,9 +134,6 @@ class Drink(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text, nullable=False)
-
-    def __repr__(self):
-        return 'Drink ' + str(self.id)
 
 class Liquid(db.Model):
     id = db.Column(db.Integer, primary_key=True)
