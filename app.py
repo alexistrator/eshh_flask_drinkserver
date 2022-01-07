@@ -366,7 +366,7 @@ def check_glass_placement():
             if INSERTED:                
                 if RASPI:
                     try:
-                        pouring_operations.tare_scale()
+                        hx.tare()
                         pouring_operations.control_pouring_process(session,gpio_settings, beverages, extraction_cap_ml_s, hx)
 
                         # TODO PRIO2 Ajax and JS to handle pouring process
