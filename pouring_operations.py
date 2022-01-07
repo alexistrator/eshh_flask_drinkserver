@@ -2,6 +2,7 @@ import time
 import sys
 from math import isclose
 import db_operations
+import distance as d
 import RPi.GPIO as GPIO
 from hx711 import HX711
 
@@ -14,7 +15,7 @@ from hx711 import HX711
 
 # set the usual value read from the distance sensor. If the distance is significantly different, we can assume that a glass
 # has been inserted.
-standard_value_distance_sens = 0
+standard_value_distance_sens = 16.5
 
 ########################################################################################################################
 #
@@ -41,18 +42,15 @@ def set_rgb_color(color:str):
 # TODO Prio1
 # Get the distance sensor value in order to evaluate whether a glass has been placed in the automat or not
 def get_distance_sensor_val():
-    # 1 - start the distance sensor
-    # 2 - read the current value
-    # 3 - turn it back off
-    # 4 - return value
-    sensor_value = 20
+    sensor_value = d.distance()
     return sensor_value
 
 # tells us whether a glass was inserted or not, based on the distance sensor values
 def check_glass_inserted():
     global standard_value
     current_value = get_distance_sensor_val()
-    if isclose(current_value, standard_value_distance_sens, abs_tol=10):
+    print("disance: " + str(current_value))
+    if isclose(current_value, standard_value_distance_sens, abs_tol=4):
         return False
     else:
         return True
