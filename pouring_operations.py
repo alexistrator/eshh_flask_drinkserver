@@ -153,7 +153,7 @@ def pour_liquid(liquid_id:int, outlet, amount_ml:int, gpio_pin:int,
             scale = get_scale_value(gpio_settings, hx)
             if scale == -0.0:
                 scale = 0.0
-            if old_scale == scale and time.time > start_time + 2:
+            if old_scale == scale and time.time - start_time > 2:
                 print(time.time)
                 overflow_counter += 1
             old_scale = scale
@@ -165,7 +165,7 @@ def pour_liquid(liquid_id:int, outlet, amount_ml:int, gpio_pin:int,
             scale = get_scale_value(gpio_settings, hx)
             if scale == -0.0:
                 scale = 0.0
-            if old_scale == scale and time.time > start_time + 2:
+            if old_scale == scale and time.time - start_time > 2:
                 overflow_counter += 1
             old_scale = scale
 
