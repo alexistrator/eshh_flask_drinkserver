@@ -134,13 +134,20 @@ def pour_liquid(liquid_id:int, outlet, amount_ml:int, gpio_pin:int,
     time.sleep(1)
     GPIO.output( gpio_settings[outlet], GPIO.LOW )
     scale = 0
-
-    while scale <= amount_ml:
-        scale = get_scale_value(gpio_settings, hx)
-        if scale == -0.0:
-            scale = 0.0
-        print(scale)
-        time.sleep(0.3)
+    if outlet == 'valve':
+        while scale <= amount_ml-30:
+            scale = get_scale_value(gpio_settings, hx)
+            if scale == -0.0:
+                scale = 0.0
+            print(scale)
+            time.sleep(0.3)
+    else:
+        while scale <= amount_ml:
+            scale = get_scale_value(gpio_settings, hx)
+            if scale == -0.0:
+                scale = 0.0
+            print(scale)
+            time.sleep(0.3)
     GPIO.output( gpio_settings[outlet], GPIO.HIGH )
     print('finished pouring: ' + liquid_name)
     time.sleep(4)
