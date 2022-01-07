@@ -85,7 +85,7 @@ gpio_settings = {
         "pump_3":       12,
         #"pump_4":       26,
         #"pump_5":       26,
-        "valve":        26,
+        "valve":        16,
         "scale_out":    0,
         "scale_in_DT":  5,
         "scale_in_SCK": 6,
