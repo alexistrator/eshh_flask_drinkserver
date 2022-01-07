@@ -81,8 +81,8 @@ ansaug_times = {
 ########################################################################################################################
 gpio_settings = {
         "pump_1":       21,
-        "pump_2":       23,
-        "pump_3":       26,
+        "pump_2":       20,
+        "pump_3":       12,
         "pump_4":       26,
         "pump_5":       26,
         "valve":        26,
@@ -106,7 +106,7 @@ if RASPI:
     for key, value in gpio_settings.items():
         if re.match('^pump', key) or re.match('^valve', key) or re.match('^rgb', key): 
             if value != 0: 
-                GPIO.setup(value, GPIO.OUT, initial=GPIO.LOW)
+                GPIO.setup(value, GPIO.OUT, initial=GPIO.HIGH)
     print('i did set up the gpios')
 
     if SCALE: 
@@ -459,11 +459,11 @@ def pump_action2(gpio):
     else:
         if request.form['button'] == "Start":
             print('Start: ' + str(gpio))
-            GPIO.output( gpio_settings[str(gpio)], GPIO.HIGH )
+            GPIO.output( gpio_settings[str(gpio)], GPIO.LOW )
             pass
         if request.form['button'] == "Stop":
             print('Stop: ' + str(gpio))
-            GPIO.output( gpio_settings[str(gpio)], GPIO.LOW )
+            GPIO.output( gpio_settings[str(gpio)], GPIO.HIGH )
             pass
         return render_template('/admin/pump_action.html', gpio_settings=gpio_settings)
             
