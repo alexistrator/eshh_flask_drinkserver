@@ -143,18 +143,29 @@ def pour_liquid(liquid_id:int, outlet, amount_ml:int, gpio_pin:int,
     time.sleep(1)
     GPIO.output( gpio_settings[outlet], GPIO.LOW )
     scale = 0
+    overflow_counter = 0
+    start_time = time.time
+
     if outlet == 'valve':
-        while scale <= amount_ml-30:
+        while scale <= amount_ml-30 and overflow_counter < 5:
             scale = get_scale_value(gpio_settings, hx)
             if scale == -0.0:
                 scale = 0.0
+            if scale == scale and time.time > start_time + 2:
+                overflow_counter += 1
+            else:
+                overflow_counter = 0
             print(scale)
             time.sleep(0.3)
     else:
-        while scale <= amount_ml:
+        while scale <= amount_ml and overflow_counter < 5:
             scale = get_scale_value(gpio_settings, hx)
             if scale == -0.0:
                 scale = 0.0
+            if scale == scale and time.time > start_time + 2:
+                overflow_counter += 1
+            else:
+                overflow_counter = 0
             print(scale)
             time.sleep(0.3)
     GPIO.output( gpio_settings[outlet], GPIO.HIGH )
