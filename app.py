@@ -10,7 +10,7 @@ from sqlalchemy.orm.relationships import RelationshipProperty
 RASPI = True
 SCALE = True
 #HOST = "127.0.0.1"
-HOST = "192.168.15.203"
+HOST = "192.168.193.203"
 
 if RASPI:
     import RPi.GPIO as GPIO
