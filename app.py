@@ -109,6 +109,18 @@ if RASPI:
                 GPIO.setup(value, GPIO.OUT, initial=GPIO.HIGH)
     print('i did set up the gpios')
 
+
+    #GPIO Mode (BOARD / BCM)
+    GPIO.setmode(GPIO.BCM)
+    
+    #set GPIO Pins
+    GPIO_TRIGGER = 25
+    GPIO_ECHO = 26
+    
+    #set GPIO direction (IN / OUT)
+    GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
+    GPIO.setup(GPIO_ECHO, GPIO.IN)
+
     if SCALE: 
         # scale - configure the scale environment
         # TODO PRIO2 check if this works on the raspberry pi
