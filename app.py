@@ -48,8 +48,8 @@ beverages = {
         "pump_1":"",
         "pump_2":"",
         "pump_3":"",
-        "pump_4":"",
-        "pump_5":"",
+        # "pump_4":"",
+        # "pump_5":"",
         "valve":""
         }
 
@@ -59,8 +59,8 @@ extraction_cap_ml_s = {
         "pump_1":   1,
         "pump_2":   1,
         "pump_3":   1,
-        "pump_4":   5,
-        "pump_5":   10,
+        #"pump_4":   5,
+        #"pump_5":   10,
         "valve":    20
 }
 
